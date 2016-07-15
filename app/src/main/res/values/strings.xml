@@ -1,0 +1,85 @@
+<resources>
+    <string name="app_name">Take Attendance Application</string>
+    <string name="action_settings">Settings</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="film_genres">Take Attendance Application</string>
+    <string name="account">namthse03439@fpt.edu.vn</string>
+    <string name="date">22 Oct 2015</string>
+    <string name="selected_item">Selected item</string>
+
+    <string-array name="film_genre">
+        <item>Schedule</item>
+        <item>Setting</item>
+    </string-array>
+
+    <string-array name="actionFilms">
+        <item>Take attendance today</item>
+        <item>Timetable</item>
+        <item>Historical report</item>
+    </string-array>
+
+    <string name="title_fragment_takeAttendanceToday">Take attendance today</string>
+
+    <string name="action_refresh">Refresh</string>
+
+    <string-array name="subjects">
+        <item> All subjects</item>
+    </string-array>
+
+    <string-array name="musicals">
+        <item>Face training</item>
+        <item>Change password</item>
+        <item>Log out</item>
+    </string-array>
+
+    <string-array name="dramas">
+        <item>Home of the Brave (1949)</item>
+        <item>The Accused (1949)</item>
+        <item>12 Angry Men (1957)</item>
+        <item>Compulsion (1959)</item>
+        <item>Inherit the Wind (1960)</item>
+        <item>To Kill a Mockingbird (1962)</item>
+        <item>Mrs. Miniver (1942)</item>
+        <item>Since You Went Away (1944)</item>
+        <item>The Champ (1931)</item>
+        <item>Nashville (1975)</item>
+    </string-array>
+
+    <string-array name="thrillers">
+        <item>Alien (1979)</item>
+        <item>The French Connection (1971)</item>
+        <item>High Noon (1952)</item>
+        <item>Double Indemnity (1944)</item>
+        <item>Safety Last (1923)</item>
+        <item>The Lady From Shanghai (1948)</item>
+        <item>The Third Man (1949)</item>
+        <item>Rear Window (1954)</item>
+        <item>The 39 Steps (1935)</item>
+        <item>Shadow of a Doubt (1943)</item>
+    </string-array>
+
+    <string-array name="comedies">
+        <item>Safety Last (1923)</item>
+        <item>Duck Soup (1933)</item>
+        <item>Cat Ballou (1965)</item>
+        <item>What\'s Up, Tiger Lily? (1966)</item>
+        <item>Blazing Saddles (1974)</item>
+        <item>Play It Again, Sam (1972)</item>
+        <item>The Cheap Detective (1978)</item>
+        <item>The Naked Gun (1988)</item>
+        <item>The Freshman (1990)</item>
+        <item>Waiting for Guffman (1996) </item>
+    </string-array>
+
+    <string name="action_registerDevice"> I agree to register this device for my account. </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="instruction_1"> This subject will be available to take attendance later. </string>
+    <string name="instruction_2"> You present at class in time of this subject. </string>
+    <string name="instruction_3"> You present at class late more than 15 minutes from the start time of this subject.  </string>
+    <string name="instruction_4"> You absent at class this subject. </string>
+
+</resources>
