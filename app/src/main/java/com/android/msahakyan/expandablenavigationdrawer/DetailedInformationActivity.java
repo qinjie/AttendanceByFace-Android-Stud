@@ -587,6 +587,19 @@ public class DetailedInformationActivity extends AppCompatActivity {
         switch (id) {
             case android.R.id.home:
                 // app icon in action bar clicked; goto parent activity.
+                Intent resultIntent = new Intent();
+                setResult(Activity.RESULT_OK, resultIntent);
+
+                outStage = GlobalVariable.scheduleManager.isTakeAttendance(currentIndex);
+                if (inStage != outStage)
+                {
+                    resultIntent.putExtra(TakeAttendanceTodayFragment.UPDATE_SCHEDULE_VIEW, 1);
+                }
+                else
+                {
+                    resultIntent.putExtra(TakeAttendanceTodayFragment.UPDATE_SCHEDULE_VIEW, 0);
+                }
+                
                 this.finish();
                 return true;
             default:

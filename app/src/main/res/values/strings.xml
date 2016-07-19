@@ -28,7 +28,8 @@
         <item>Change password</item>
     </string-array>
 
-    <string-array name="help"></string-array>
+    <string-array name="help">
+    </string-array>
 
     <string-array name="logOut"></string-array>
 

@@ -1,5 +1,6 @@
 package com.android.msahakyan.expandablenavigationdrawer;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.ChangePasswordFragment;
+import com.android.msahakyan.expandablenavigationdrawer.Fragment.ColorInstructionFragment;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.FaceTrainingFragment;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.TakeAttendanceTodayFragment;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.TimeTableFragment;
@@ -171,7 +172,7 @@ public class MainActivity extends ActionBarActivity {
                 }
                 else if (groupPosition == 3)
                 {
-                    //TODO
+                    fragment = new ColorInstructionFragment();
                 }
                 else if (groupPosition == 4)
                 {
@@ -224,9 +225,6 @@ public class MainActivity extends ActionBarActivity {
                         case 1: // Change password
                             fragment = new ChangePasswordFragment();
                             break;
-                        case 2: // Log out
-                            logoutAction();
-                            return true;
                         default:
                             return false;
                     }
@@ -324,4 +322,5 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, LogInActivity.class);
         startActivity(intent);
     }
+
 }

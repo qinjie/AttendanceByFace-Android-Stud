@@ -25,6 +25,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.content.SharedPreferences;
+
 import com.android.msahakyan.expandablenavigationdrawer.LogInActivity;
 
 /**
@@ -273,6 +275,21 @@ public class GlobalVariable {
             e.printStackTrace();
             Notification.showMessage(activity, 6);
         }
+    }
+
+    public static void logoutAction(Activity activity){
+        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
+        String auCode = pref.getString("authorizationCode", null);
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+
+        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+        Call<ResponseBody> call = client.logout();
+
+        Intent intent = new Intent(activity, LogInActivity.class);
+        activity.startActivity(intent);
     }
 
 }

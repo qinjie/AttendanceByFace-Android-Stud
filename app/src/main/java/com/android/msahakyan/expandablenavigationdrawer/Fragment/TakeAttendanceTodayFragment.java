@@ -240,7 +240,7 @@ public class TakeAttendanceTodayFragment extends Fragment {
                     gd.setColor(0xFFC0C0C0);
                     break;
                 case 1:
-                    gd.setColor(0xFF00FF7F);
+                    gd.setColor(0xFF0b7101);
                     break;
                 case 2:
                     gd.setColor(0xFFFFA500);
@@ -360,7 +360,6 @@ public class TakeAttendanceTodayFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 tls[1].removeAllViews();
-                System.out.print("Tung");
             }
         });
     }
