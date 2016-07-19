@@ -13,8 +13,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
@@ -53,6 +55,8 @@ public class MainActivity extends ActionBarActivity {
     private ExpandableListAdapter mExpandableListAdapter;
     private List<String> mExpandableListTitle;
     private Map<String, List<String>> mExpandableListData;
+
+    private ListView mDrawList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +144,8 @@ public class MainActivity extends ActionBarActivity {
     private void addDrawerItems() {
         mExpandableListAdapter = new CustomExpandableListAdapter(this, mExpandableListTitle, mExpandableListData);
         mExpandableListView.setAdapter(mExpandableListAdapter);
+        mExpandableListView.setGroupIndicator(null);
+
         mExpandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
@@ -154,52 +160,76 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        mExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                getSupportActionBar().setTitle(mExpandableListTitle.get(groupPosition).toString());
+
+                android.app.Fragment fragment = null;
+
+                if(groupPosition == 0) {
+                    fragment = new TakeAttendanceTodayFragment();
+                }
+                else if (groupPosition == 3)
+                {
+                    //TODO
+                }
+                else if (groupPosition == 4)
+                {
+                    logoutAction();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, fragment)
+                        .commit();
+
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
+
         mExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-                //TODO
                 android.app.Fragment fragment = null;
 
-                switch (groupPosition)
+                if (groupPosition == 1)
                 {
-                    case 0: // Function
-                        switch (childPosition)
-                        {
-                            case 0: // Take attendance today
-                                fragment = new TakeAttendanceTodayFragment();
-                                break;
-                            case 1: // Timetable
-                                fragment = new TimeTableFragment();
-                                break;
-                            case 2: // Historical Report
-                                fragment = new HistoricalReportFragment();
-                                break;
-                            default:
-                                fragment = new TakeAttendanceTodayFragment();
-                                break;
-                        }
-                        break;
-
-                    case 1: // Setting
-                        switch (childPosition)
-                        {
-                            case 0: // Face training
-                                fragment = new FaceTrainingFragment();
-                                break;
-                            case 1: // Change password
-                                fragment = new ChangePasswordFragment();
-                                break;
-                            case 2: // Log out
-                                logoutAction();
-                                return true;
-                            default:
-                                return false;
-                        }
-                        break;
-
-                    default:
-                        return false;
+                    switch (childPosition)
+                    {
+                        case 0: // Timetable
+                            fragment = new TimeTableFragment();
+                            break;
+                        case 1: // Attendance history
+                            fragment = new HistoricalReportFragment();
+                            break;
+                        default:
+                            fragment = new TimeTableFragment();
+                            break;
+                    }
+                }
+                else if (groupPosition == 2)
+                {
+                    switch (childPosition)
+                    {
+                        case 0: // Face training
+                            fragment = new FaceTrainingFragment();
+                            break;
+                        case 1: // Change password
+                            fragment = new ChangePasswordFragment();
+                            break;
+                        case 2: // Log out
+                            logoutAction();
+                            return true;
+                        default:
+                            return false;
+                    }
                 }
 
                 FragmentManager fragmentManager = getFragmentManager();
@@ -216,6 +246,8 @@ public class MainActivity extends ActionBarActivity {
                 return false;
             }
         });
+
+
     }
 
     private void setupDrawer() {
@@ -266,9 +298,9 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         // Activate the navigation drawer toggle
         if (mDrawerToggle.onOptionsItemSelected(item)) {

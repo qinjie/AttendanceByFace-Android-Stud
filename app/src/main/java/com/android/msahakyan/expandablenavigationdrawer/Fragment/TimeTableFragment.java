@@ -122,9 +122,9 @@ public class TimeTableFragment extends Fragment {
         // Inflate the layout for this fragment
         myView = inflater.inflate(R.layout.fragment_time_table, container, false);
 
-        context.setTitle("Timetable");
+        context.setTitle("Timetable of the week");
 
-        spin = (Spinner) myView.findViewById(R.id.time_table_spinner);
+        //spin = (Spinner) myView.findViewById(R.id.time_table_spinner);
         subjectSpin = (Spinner) myView.findViewById(R.id.header2);
 
         getTableLayout();
@@ -661,6 +661,8 @@ public class TimeTableFragment extends Fragment {
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
+        timer.start();
+
         StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
         Call<ResponseBody> call = client.getListClasses(semester);
 
@@ -723,14 +725,12 @@ public class TimeTableFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    isServerRespond = true;
-                    timer.cancel();
                     int messageCode = response.code();
                     JSONArray listSemesters = new JSONArray(response.body().string());
                     String lastSmt = listSemesters.getString(listSemesters.length() - 1);
                     getListClassesFunction(lastSmt);
 
-                    getTimeTableNextKDays(getK(GlobalVariable.currentTimeSelection));
+                    getTimeTableNextKDays(7);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -785,6 +785,7 @@ public class TimeTableFragment extends Fragment {
 
     void getTimeTableNextKDays(int k) {
         Preferences.showLoading(context, "Initialize", "Loading data from server...");
+        timer.start();
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
@@ -795,6 +796,8 @@ public class TimeTableFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
+                    timer.cancel();
+                    isServerRespond = true;
                     Preferences.dismissLoading();
                     int messageCode = response.code();
                     GlobalVariable.currentTimetable = new JSONObject(response.body().string());

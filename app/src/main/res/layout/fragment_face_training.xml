@@ -2,71 +2,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.android.msahakyan.expandablenavigationdrawer.Fragment.FaceTrainingFragment">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
 
-        <RelativeLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:id="@+id/titleLayout"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Color and Time Instruction"
-                android:textSize="25dp"
-                android:gravity="center"
-                android:layout_centerHorizontal="true"
-                android:textColor="@android:color/background_dark"/>
-        </RelativeLayout>
-
-        <RelativeLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/instruction_layout"
+            android:text="Latest Training Image"
+            android:textSize="25dp"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:textColor="@android:color/background_dark"
+            android:id="@+id/text"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/text"
+            android:layout_above="@+id/btn_training"
+            android:layout_marginTop="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Start Face Training"
+            android:id="@+id/btn_training"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Start Face Training"
-                android:id="@+id/btn_training" />
-        </RelativeLayout>
-
-        <ScrollView
-            android:id="@+id/layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/titleLayout"
-            android:layout_above="@+id/instruction_layout"
-            android:fillViewport="true"
-            android:scrollbarStyle="insideOverlay"
-            android:orientation="horizontal"
-            android:scrollbars="horizontal|vertical"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp">
-
-            <TableLayout
-                android:id="@+id/tableLayout"
-                android:orientation="vertical"
-                android:layout_margin="1dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </TableLayout>
-
-        </ScrollView>
-
+            android:layout_marginTop="10dp"/>
     </RelativeLayout>
+
+        <!--<ScrollView-->
+            <!--android:id="@+id/layout"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/titleLayout"-->
+            <!--android:layout_above="@+id/instruction_layout"-->
+            <!--android:fillViewport="true"-->
+            <!--android:scrollbarStyle="insideOverlay"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:scrollbars="horizontal|vertical"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_marginTop="10dp">-->
+
+            <!--<TableLayout-->
+                <!--android:id="@+id/tableLayout"-->
+                <!--android:orientation="vertical"-->
+                <!--android:layout_margin="1dp"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+            <!--</TableLayout>-->
+
+        <!--</ScrollView>-->
+
 
 </FrameLayout>

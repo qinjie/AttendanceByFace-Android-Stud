@@ -58,6 +58,10 @@ public class GlobalVariable {
     public static JSONObject subjectSummary = null;
     //- Subjects summary
 
+    //+ Latest image training
+
+    //- Latest image training
+
     public static void resizeImage(Activity activity, String mCurrentPhotoPath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;

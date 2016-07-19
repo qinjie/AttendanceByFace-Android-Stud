@@ -42,7 +42,8 @@
         <activity android:name=".SignUpActivity" />
         <activity android:name=".RegisterNewDeviceActivity" />
         <activity android:name=".DetailedInformationActivity" />
-        <activity android:name=".Fragment.HistoricalReportFragment"></activity>
+        <activity android:name=".Fragment.HistoricalReportFragment" />
+        <activity android:name=".Fragment.Main2Activity"></activity>
     </application>
 
 </manifest>

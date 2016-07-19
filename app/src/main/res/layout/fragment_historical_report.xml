@@ -13,33 +13,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/time_table">
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/time_table">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Current semester"
-                android:id="@+id/text_Semester"
-                android:layout_margin="1dp" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:textSize="20dp"-->
+                <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
+                <!--android:text="Current semester"-->
+                <!--android:id="@+id/text_Semester"-->
+                <!--android:layout_margin="1dp" />-->
 
-            <Spinner
-                android:id="@+id/time_table_semester"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/spinner_style"
-                android:visibility="invisible"/>
+            <!--<Spinner-->
+                <!--android:id="@+id/time_table_semester"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/spinner_style"-->
+                <!--android:visibility="invisible"/>-->
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/time_table">
+            android:layout_height="match_parent">
 
             <TableLayout
                 android:id="@+id/header"

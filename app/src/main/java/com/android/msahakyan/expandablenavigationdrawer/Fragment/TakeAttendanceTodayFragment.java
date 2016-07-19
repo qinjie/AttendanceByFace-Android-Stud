@@ -1,6 +1,5 @@
 package com.android.msahakyan.expandablenavigationdrawer.Fragment;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,13 +7,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.OnSwipeTouchListener;
-import com.android.msahakyan.expandablenavigationdrawer.MainActivity;
 import com.android.msahakyan.expandablenavigationdrawer.R;
 
 import android.app.Activity;
@@ -25,7 +21,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.app.Fragment;
 import android.view.Gravity;
 import android.widget.ScrollView;
-import android.widget.SearchView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -329,7 +324,7 @@ public class TakeAttendanceTodayFragment extends Fragment {
             }
         }
 
-        createSubjectView(false, time, 17, -1, null);
+        createSubjectView(false, time, 18, -1, null);
     }
 
     private void getTimeTableOneDay(String date)
@@ -357,12 +352,14 @@ public class TakeAttendanceTodayFragment extends Fragment {
 
                 }
                 catch(Exception e){
+                    tls[1].removeAllViews();
                     e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                tls[1].removeAllViews();
                 System.out.print("Tung");
             }
         });
@@ -387,11 +384,9 @@ public class TakeAttendanceTodayFragment extends Fragment {
         scrollView.setOnTouchListener(new OnSwipeTouchListener(context)
         {
             public void onSwipeRight() {
-                System.out.print("Right");
                 updateTimeView(YESTERDAY);
             };
             public void onSwipeLeft() {
-                System.out.print("Left");
                 updateTimeView(TOMORROW);
             };
         });
@@ -418,20 +413,27 @@ public class TakeAttendanceTodayFragment extends Fragment {
                 return;
         }
 
-        //+ Time View
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, MM/dd/yyyy");
-        String stringTime = simpleDateFormat.format(calendar.getTime());
-        textTime = (TextView) myView.findViewById(R.id.text_Time);
-        int today = calendar.get(Calendar.DAY_OF_WEEK);
-        textTime.setText(stringTime);
-        textTime.setTextColor(rainbow[today-2]);
-        //- Time View
+        try
+        {
+            //+ Time View
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, MM/dd/yyyy");
+            String stringTime = simpleDateFormat.format(calendar.getTime());
+            textTime = (TextView) myView.findViewById(R.id.text_Time);
+            int today = calendar.get(Calendar.DAY_OF_WEEK);
+            textTime.setText(stringTime);
+            textTime.setTextColor(rainbow[today-1]);
+            //- Time View
 
-        //+ Load timetable
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String time = dateFormat.format(calendar.getTime());
-        loadTimetable(time);
-        //- Load timetable
+            //+ Load timetable
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String time = dateFormat.format(calendar.getTime());
+            loadTimetable(time);
+            //- Load timetable
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void loadTimetable(final String time)

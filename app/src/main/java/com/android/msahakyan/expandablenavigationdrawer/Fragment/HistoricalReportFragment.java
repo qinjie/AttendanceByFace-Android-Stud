@@ -122,7 +122,7 @@ public class HistoricalReportFragment extends Fragment {
 
         context.setTitle("Historical Report");
 
-        spin = (Spinner) myView.findViewById(R.id.time_table_semester);
+//        spin = (Spinner) myView.findViewById(R.id.time_table_semester);
         subjectSpin = (Spinner) myView.findViewById(R.id.header2);
 
         getTableLayout();

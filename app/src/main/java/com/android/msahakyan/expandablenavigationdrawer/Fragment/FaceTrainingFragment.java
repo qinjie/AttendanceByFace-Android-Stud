@@ -2,28 +2,20 @@ package com.android.msahakyan.expandablenavigationdrawer.Fragment;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import com.android.msahakyan.expandablenavigationdrawer.R;
 import com.facepp.http.HttpRequests;
@@ -116,71 +108,71 @@ public class FaceTrainingFragment extends Fragment {
         context = this.getActivity();
     }
 
-    private void createInstructionView()
-    {
-        tl = (TableLayout) myView.findViewById(R.id.tableLayout);
-        for(int i = 0; i < numOfInstruction; i++)
-        {
-            TextView tv = new TextView(context);
-
-            if (i < 4)
-            {
-                TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT, Gravity.CENTER);
-                params.height = 140;
-                tv.setLayoutParams(params);
-            }
-            else
-            {
-                TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
-                params.setMargins(2, 2, 2, 2);
-                tv.setLayoutParams(params);
-            }
-
-            GradientDrawable gd = new GradientDrawable();
-
-            switch (i) {
-                case 0:
-                    gd.setColor(0xFFC0C0C0);
-                    tv.setText(R.string.instruction_1);
-                    break;
-                case 1:
-                    gd.setColor(0xFF00FF7F);
-                    tv.setText(R.string.instruction_2);
-                    break;
-                case 2:
-                    gd.setColor(0xFFFFA500);
-                    tv.setText(R.string.instruction_3);
-                    break;
-                case 3:
-                    gd.setColor(0xFFCC0000);
-                    tv.setText(R.string.instruction_4);
-                    break;
-            }
-
-            tv.setTextSize(16);
-            if (i < 4)
-            {
-                gd.setCornerRadius(5);
-                gd.setStroke(1, 0xFF000000);
-                tv.setBackgroundDrawable(gd);
-                tv.setTextColor(Color.WHITE);
-                tv.setGravity(Gravity.CENTER);
-            }
-            else
-            {
-                tv.setBackgroundColor(Color.WHITE);
-                tv.setTextColor(Color.RED);
-            }
-
-            TableRow trs = new TableRow(context);
-            TableLayout.LayoutParams layoutRow = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
-            trs.setLayoutParams(layoutRow);
-
-            trs.addView(tv);
-
-            tl.addView(trs);
-        }
-    }
+//    private void createInstructionView()
+//    {
+//        tl = (TableLayout) myView.findViewById(R.id.tableLayout);
+//        for(int i = 0; i < numOfInstruction; i++)
+//        {
+//            TextView tv = new TextView(context);
+//
+//            if (i < 4)
+//            {
+//                TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT, Gravity.CENTER);
+//                params.height = 140;
+//                tv.setLayoutParams(params);
+//            }
+//            else
+//            {
+//                TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+//                params.setMargins(2, 2, 2, 2);
+//                tv.setLayoutParams(params);
+//            }
+//
+//            GradientDrawable gd = new GradientDrawable();
+//
+//            switch (i) {
+//                case 0:
+//                    gd.setColor(0xFFC0C0C0);
+//                    tv.setText(R.string.instruction_1);
+//                    break;
+//                case 1:
+//                    gd.setColor(0xFF00FF7F);
+//                    tv.setText(R.string.instruction_2);
+//                    break;
+//                case 2:
+//                    gd.setColor(0xFFFFA500);
+//                    tv.setText(R.string.instruction_3);
+//                    break;
+//                case 3:
+//                    gd.setColor(0xFFCC0000);
+//                    tv.setText(R.string.instruction_4);
+//                    break;
+//            }
+//
+//            tv.setTextSize(16);
+//            if (i < 4)
+//            {
+//                gd.setCornerRadius(5);
+//                gd.setStroke(1, 0xFF000000);
+//                tv.setBackgroundDrawable(gd);
+//                tv.setTextColor(Color.WHITE);
+//                tv.setGravity(Gravity.CENTER);
+//            }
+//            else
+//            {
+//                tv.setBackgroundColor(Color.WHITE);
+//                tv.setTextColor(Color.RED);
+//            }
+//
+//            TableRow trs = new TableRow(context);
+//            TableLayout.LayoutParams layoutRow = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
+//            trs.setLayoutParams(layoutRow);
+//
+//            trs.addView(tv);
+//
+//            tl.addView(trs);
+//        }
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -189,8 +181,6 @@ public class FaceTrainingFragment extends Fragment {
         myView = inflater.inflate(R.layout.fragment_face_training, container, false);
 
         context.setTitle("Face Training");
-
-        createInstructionView();
 
         mTrainingBtn = (Button) myView.findViewById(R.id.btn_training);
         mTrainingBtn.setOnClickListener(new View.OnClickListener() {
@@ -297,7 +287,6 @@ public class FaceTrainingFragment extends Fragment {
 
             // -----------------------------
         }
-
     }
 
     void trainingFunction() {
@@ -313,7 +302,6 @@ class TrainThread extends Thread{
     Thread t;
     String mCurrentPhotoPath = null;
     Activity activity;
-    CountDownTimer timer;
 
     public TrainThread(String _mCurrentPhotoPath, Activity _activity){
         mCurrentPhotoPath = _mCurrentPhotoPath;
@@ -332,7 +320,6 @@ class TrainThread extends Thread{
 
         String newFaceID = GlobalVariable.get1FaceID(activity, httpRequests, imgFile);
             if(newFaceID != null) {
-                timer.cancel();
             String personID = GlobalVariable.getThisPersonID(activity, auCode);
 
             if (personID.compareTo("") != 0) { //this person has been trained before
@@ -349,6 +336,7 @@ class TrainThread extends Thread{
             }
             //Show notification about sucessful training
             Notification.showMessage(activity, 0);
+
         }
 
         Preferences.dismissLoading();

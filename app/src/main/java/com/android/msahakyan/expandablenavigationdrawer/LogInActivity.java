@@ -49,7 +49,7 @@ public class LogInActivity extends AppCompatActivity {
     @InjectView(R.id.link_forgotPass)
     TextView _forgotPassLink;
     @InjectView(R.id.link_signup)        TextView _signupLink;
-    @InjectView(R.id.link_updateMacAddress)    TextView _registerDeviceLink;
+//    @InjectView(R.id.link_updateMacAddress)    TextView _registerDeviceLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,15 +105,15 @@ public class LogInActivity extends AppCompatActivity {
             }
         });
 
-        _registerDeviceLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Start the RegisterNewDeviceActivity activity
-                Intent intent = new Intent(getApplicationContext(), RegisterNewDeviceActivity.class);
-                startActivityForResult(intent, REQUEST_REGISTER_DEVICE);
-            }
-        });
+//        _registerDeviceLink.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                // Start the RegisterNewDeviceActivity activity
+//                Intent intent = new Intent(getApplicationContext(), RegisterNewDeviceActivity.class);
+//                startActivityForResult(intent, REQUEST_REGISTER_DEVICE);
+//            }
+//        });
 
         if (!isNetworkAvailable())
         {

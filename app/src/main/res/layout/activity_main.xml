@@ -19,6 +19,6 @@
         android:background="@color/white"
         android:divider="@color/group_divider_color"
         android:dividerHeight="@dimen/divider_height"
-        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"/>
+        android:groupIndicator="@android:color/transparent"/>
 
 </android.support.v4.widget.DrawerLayout>

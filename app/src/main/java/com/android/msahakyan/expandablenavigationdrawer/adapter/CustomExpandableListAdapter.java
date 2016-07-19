@@ -2,10 +2,12 @@ package com.android.msahakyan.expandablenavigationdrawer.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.msahakyan.expandablenavigationdrawer.R;
@@ -14,6 +16,15 @@ import java.util.List;
 import java.util.Map;
 
 public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
+
+    private static final int[] EMPTY_STATE_SET = {};
+    private static final int[] GROUP_EXPANDED_STATE_SET =
+            {android.R.attr.state_expanded};
+
+    private static final int[][] GROUP_STATE_SETS = {
+            EMPTY_STATE_SET, // 0
+            GROUP_EXPANDED_STATE_SET // 1
+    };
 
     private Context mContext;
     private List<String> mExpandableListTitle;
@@ -84,6 +95,19 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
             .findViewById(R.id.listTitle);
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);
+
+        View ind = convertView.findViewById( R.id.explist_indicator);
+        if( ind != null ) {
+            ImageView indicator = (ImageView)ind;
+            if( getChildrenCount( listPosition ) == 0 ) {
+                indicator.setVisibility( View.INVISIBLE );
+            } else {
+                indicator.setVisibility( View.VISIBLE );
+                int stateSetIndex = ( isExpanded ? 1 : 0) ;
+                Drawable drawable = indicator.getDrawable();
+                drawable.setState(GROUP_STATE_SETS[stateSetIndex]);
+            }
+        }
         return convertView;
     }
 

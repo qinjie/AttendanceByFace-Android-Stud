@@ -79,13 +79,13 @@
                 android:gravity="center"
                 android:textSize="16dip"/>
 
-            <TextView android:id="@+id/link_updateMacAddress"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Use new device? Register now"
-                android:gravity="center"
-                android:textSize="16dip"/>
+            <!--<TextView android:id="@+id/link_updateMacAddress"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginBottom="24dp"-->
+                <!--android:text="Use new device? Register now"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="16dip"/>-->
 
         </LinearLayout>
     </ScrollView>
