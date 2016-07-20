@@ -46,8 +46,8 @@ public class LogInActivity extends AppCompatActivity {
     @InjectView(R.id.input_password)     EditText _passwordText;
     @InjectView(R.id.btn_login)
     Button _loginButton;
-    @InjectView(R.id.link_forgotPass)
-    TextView _forgotPassLink;
+//    @InjectView(R.id.link_forgotPass)
+//    TextView _forgotPassLink;
     @InjectView(R.id.link_signup)        TextView _signupLink;
 //    @InjectView(R.id.link_updateMacAddress)    TextView _registerDeviceLink;
 
@@ -85,15 +85,15 @@ public class LogInActivity extends AppCompatActivity {
             }
         });
 
-        _forgotPassLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Start the Signup activity
-                Intent intent = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
-                startActivityForResult(intent, REQUEST_FORGOT_PASSWORD);
-            }
-        });
+//        _forgotPassLink.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                // Start the Signup activity
+//                Intent intent = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
+//                startActivityForResult(intent, REQUEST_FORGOT_PASSWORD);
+//            }
+//        });
 
         _signupLink.setOnClickListener(new View.OnClickListener() {
 

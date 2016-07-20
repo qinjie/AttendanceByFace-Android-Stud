@@ -387,7 +387,7 @@ public class HistoricalReportFragment extends Fragment {
             String totalSlot = absentInfo.getString("total_lessons");
             String temp1 = "Absent: " + absSlot + "/" + totalSlot;
 
-            double percent = Double.valueOf(absSlot)/Double.valueOf(totalSlot);
+            double percent = (Double.valueOf(absSlot)/Double.valueOf(totalSlot)) * 100.0;
 
             String temp2 = String.format("%.1f%% until now", percent);
 
