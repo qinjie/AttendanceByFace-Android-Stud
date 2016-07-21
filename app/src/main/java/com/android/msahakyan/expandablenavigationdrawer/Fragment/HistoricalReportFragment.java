@@ -69,10 +69,6 @@ public class HistoricalReportFragment extends Fragment {
     private String semesterList[];
     private String classSubject[];
 
-    private CountDownTimer timer;
-
-    private boolean isServerRespond = false;
-
     private OnFragmentInteractionListener mListener;
 
     public HistoricalReportFragment() {
@@ -124,57 +120,7 @@ public class HistoricalReportFragment extends Fragment {
 
 //        spin = (Spinner) myView.findViewById(R.id.time_table_semester);
         subjectSpin = (Spinner) myView.findViewById(R.id.header2);
-
         getTableLayout();
-
-        isServerRespond = false;
-        timer = new CountDownTimer(8000, 20) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                try
-                {
-                    if (isServerRespond == false)
-                    {
-                        AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
-                        String message = "Server did not respond. Please check your internet connection." +
-                                "Do you want to retry?";
-                        builder2.setMessage(message);
-                        builder2.setCancelable(true);
-
-                        builder2.setPositiveButton(
-                                "RETRY",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        getListsemesterAndLastestSemesterClassesFunction();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        builder2.setNegativeButton(
-                                "CANCEL",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Preferences.dismissLoading();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        AlertDialog alert12 = builder2.create();
-                        alert12.show();
-                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        };
-
         getListsemesterAndLastestSemesterClassesFunction();
 
         return myView;
@@ -337,7 +283,7 @@ public class HistoricalReportFragment extends Fragment {
 
                 //+ Add item to Subject Information column
                 String component = subject.getString("component");
-                String lecture = "Mr.Zhang Qinjie";
+                String lecture = subject.getString("lecturer_name");
 
                 String subjectInfo = getComponent(component) + System.getProperty ("line.separator")
                         + lecture;
@@ -444,7 +390,52 @@ public class HistoricalReportFragment extends Fragment {
 
     void getListsemesterAndLastestSemesterClassesFunction() {
         Preferences.showLoading(context, "Setup", "Loading data from server...");
+
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getListsemesterAndLastestSemesterClassesFunction();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
         timer.start();
+
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
@@ -454,9 +445,8 @@ public class HistoricalReportFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    int messageCode = response.code();
-                    isServerRespond = true;
                     timer.cancel();
+                    int messageCode = response.code();
                     JSONArray listSemesters = new JSONArray(response.body().string());
                     semesterList = new String[listSemesters.length()];
                     for(int i = 0; i < listSemesters.length(); i++)
@@ -473,20 +463,66 @@ public class HistoricalReportFragment extends Fragment {
                     getAttendanceHistoryBySemesterFunction(String.valueOf(semesterList[GlobalVariable.currentSemester]));
                 }
                 catch (Exception e) {
+                    Preferences.dismissLoading();
                     e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Preferences.dismissLoading();
             }
         });
     }
 
-    void getListClassesFunction(String semester) {
+    void getListClassesFunction(final String semester) {
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
+
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getListClassesFunction(semester);
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+        timer.start();
 
         StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
         Call<ResponseBody> call = client.getListClasses(semester);
@@ -495,35 +531,82 @@ public class HistoricalReportFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
+                    timer.cancel();
                     Preferences.dismissLoading();
+
                     int messageCode = response.code();
                     JSONArray listClasses = new JSONArray(response.body().string());
+
                     classSubject = new String[listClasses.length()];
                     for(int i = 0; i < listClasses.length(); i++)
                     {
                         classSubject[i] = listClasses.getString(i);
                     }
                     setSpinnerForSubjectView();
-
-                    System.out.print("OK");
                 }
                 catch (Exception e){
+                    Preferences.dismissLoading();
                     e.printStackTrace();
                 }
             }
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Preferences.dismissLoading();
             }
         });
     }
 
-    void getAttendanceHistoryBySemesterFunction(String semester) {
+    void getAttendanceHistoryBySemesterFunction(final String semester) {
         try
         {
             Preferences.showLoading(context, "Initialize", "Loading data from server...");
             SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
             String auCode = pref.getString("authorizationCode", null);
+
+            final CountDownTimer timer = new CountDownTimer(8000, 20) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+
+                }
+
+                @Override
+                public void onFinish() {
+                    try
+                    {
+                        AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                        String message = "Server did not respond. Please check your internet connection." +
+                                "Do you want to retry?";
+                        builder2.setMessage(message);
+                        builder2.setCancelable(true);
+
+                        builder2.setPositiveButton(
+                                "RETRY",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        getAttendanceHistoryBySemesterFunction(semester);
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        builder2.setNegativeButton(
+                                "CANCEL",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Preferences.dismissLoading();
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert12 = builder2.create();
+                        alert12.show();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            timer.start();
 
             StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
             Call<ResponseBody> call = client.getAttendanceHistory(semester);
@@ -531,6 +614,8 @@ public class HistoricalReportFragment extends Fragment {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     try {
+                        timer.cancel();
+
                         Preferences.dismissLoading();
                         int messageCode = response.code();
                         JSONObject temp = new JSONObject(response.body().string());
@@ -544,13 +629,14 @@ public class HistoricalReportFragment extends Fragment {
                         loadRecord();
                     }
                     catch (Exception e) {
+                        Preferences.dismissLoading();
                         e.printStackTrace();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                    Preferences.dismissLoading();
                 }
             });
         } catch (Exception e)

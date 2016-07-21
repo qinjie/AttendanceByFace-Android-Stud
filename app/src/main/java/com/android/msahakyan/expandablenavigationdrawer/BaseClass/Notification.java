@@ -19,6 +19,8 @@ public class Notification {
             "Password changed successfully!", // 7
             "INCORRECT_PASSWORD", // 8
             "INVALID_NEW_PASSWORD", // 9
+            "Reset password failed! Please try again!", // 10
+            "Please check your email to reset your password!", // 11
     };
 
     public static String [] LoginNoti = {

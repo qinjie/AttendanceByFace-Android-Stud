@@ -47,6 +47,10 @@ public class ErrorClass {
             "Error 35, cannot execute call function - RegisterNewDeviceActivity.register", // 35
             "Error 36, message code returned out of range - ChangePasswordActivity.changePasswordAction", // 36
             "Error 37, cannot connect to Local Server. Please check your internet connection and try again later!", // 37
+            "Error occurs when reset password", // 38
+            "Connection error when reset password", // 39
+            "Invalid email. Please try again!", // 40
+            "Server failed! Please try again!", // 41
     };
 
     public static void showError(final Activity activity, final int errorCode) {

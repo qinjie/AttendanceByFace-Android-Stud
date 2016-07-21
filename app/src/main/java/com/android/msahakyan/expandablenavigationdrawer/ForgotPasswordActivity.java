@@ -1,5 +1,9 @@
 package com.android.msahakyan.expandablenavigationdrawer;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.wifi.WifiManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -7,13 +11,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+import android.content.Intent;
 
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.SignupClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.StringClient;
+import com.google.gson.JsonObject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -23,16 +30,18 @@ import retrofit2.Response;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     @InjectView(R.id.input_email)       EditText _emailText;
-    @InjectView(R.id.btn_forgotPass)    Button   _signupButton;
+    @InjectView(R.id.btn_forgotPass)    Button   _resetPasswordButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
 
+        ButterKnife.inject(this);
+
         this.setTitle("Reset Password");
 
-        _signupButton.setOnClickListener(new View.OnClickListener() {
+        _resetPasswordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 requestNewPass();
@@ -68,46 +77,48 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     public void requestNewPass() {
 
         if (!validate()) {
-            onSignupFailed();
+            onResetPassFailed();
             return;
         }
 
         Preferences.showLoading(ForgotPasswordActivity.this, "Reset Password", "Processing...");
 
-        _signupButton.setEnabled(false);
+        _resetPasswordButton.setEnabled(false);
 
         String email = _emailText.getText().toString();
 
         // Interact with local server
         //==========================
 
-        //TODO
-//        SignupClass user = new SignupClass(username, password, email, studentId, this);
-//        signupAction(user);
+        resetPassAction(email);
 
         //--------------------------
 
     }
 
     public void onResetPassSuccess() {
-        //TODO
-//        Preferences.dismissLoading();
-//        setResult(RESULT_OK, null);
-//
-//        Toast.makeText(getBaseContext(), "Signed up successfully!", Toast.LENGTH_LONG).show();
-//
-//        Intent intent = new Intent(SignUpActivity.this, LogInActivity.class);
-//        startActivity(intent);
+        Preferences.dismissLoading();
+        setResult(RESULT_OK, null);
+        _resetPasswordButton.setEnabled(true);
 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("RESET PASSWORD");
+        builder.setMessage("Please check your email to get reset password link!");
+        builder.setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick( final DialogInterface dialogInterface, final int i) {
+                        Intent intent = new Intent(ForgotPasswordActivity.this, LogInActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+        builder.create().show();
     }
 
-    public void onSignupFailed() {
-        //TODO
-//        Preferences.dismissLoading();
-//        Toast.makeText(getBaseContext(), "Signup failed!", Toast.LENGTH_LONG).show();
-//
-//        _signupButton.setEnabled(true);
-
+    public void onResetPassFailed() {
+        _resetPasswordButton.setEnabled(true);
+        Preferences.dismissLoading();
     }
 
     public boolean validate() {
@@ -125,46 +136,45 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         return valid;
     }
 
-    public void resetPassAction(SignupClass user) {
+    public void resetPassAction(String email) {
 
-        String returnMessage = "";
+        StringClient client = ServiceGenerator.createService(StringClient.class);
 
-        //TODO
+        JsonObject userEmail = new JsonObject();
+        userEmail.addProperty("email", email);
 
-//        StringClient client = ServiceGenerator.createService(StringClient.class);
-//
-//        Call<ResponseBody> call = client.signup(user);
-//
-//        call.enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                try {
-//
-//                    int messageCode = response.code();
-//                    if(messageCode == 200){
-//                        onSignupSuccess();
-//                    }
-//                    else{
-//                        // handle when cannot signup
-//                        onSignupFailed();
-//                        Notification.showMessage(SignUpActivity.this, 5);
-//                        Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
-//                        startActivity(intent);
-//                    }
-//
-//                }
-//                catch(Exception e){
-//                    e.printStackTrace();
-//                    ErrorClass.showError(SignUpActivity.this, 27);
-//                    Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
-//                    startActivity(intent);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                ErrorClass.showError(SignUpActivity.this, 28);
-//            }
-//        });
+        Call<ResponseBody> call = client.resetPassword(userEmail);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+
+                    int messageCode = response.code();
+                    if(messageCode == 200){
+                        onResetPassSuccess();
+                    }
+                    else if (messageCode == 400){
+                        onResetPassFailed();
+                        ErrorClass.showError(ForgotPasswordActivity.this, 40);
+                    } else if (messageCode == 500)
+                    {
+                        onResetPassFailed();
+                        ErrorClass.showError(ForgotPasswordActivity.this, 41);
+                    }
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                    onResetPassFailed();
+                    ErrorClass.showError(ForgotPasswordActivity.this, 38);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                onResetPassFailed();
+                ErrorClass.showError(ForgotPasswordActivity.this, 39);
+            }
+        });
     }
 }

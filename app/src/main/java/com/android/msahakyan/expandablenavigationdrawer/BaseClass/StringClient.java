@@ -2,6 +2,8 @@ package com.android.msahakyan.expandablenavigationdrawer.BaseClass;
 
 import com.google.gson.JsonObject;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import okhttp3.ResponseBody;
@@ -60,6 +62,9 @@ public interface StringClient {
 
     @POST("user/signup")
     Call<ResponseBody> signup(@Body SignupClass user);
+
+    @POST("user/reset-password")
+    Call<ResponseBody> resetPassword(@Body JsonObject email);
 
     @POST("user/set-face-id")
     Call<ResponseBody> postFaceIDList(@Body ArrayList<String> face_id);

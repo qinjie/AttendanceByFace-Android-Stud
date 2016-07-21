@@ -41,13 +41,10 @@ public class LogInActivity extends AppCompatActivity {
     private static final int REQUEST_REGISTER_DEVICE = 1;
     private static final int REQUEST_FORGOT_PASSWORD = 2;
 
-    @InjectView(R.id.input_username)
-    EditText _usernameText;
+    @InjectView(R.id.input_username)     EditText _usernameText;
     @InjectView(R.id.input_password)     EditText _passwordText;
-    @InjectView(R.id.btn_login)
-    Button _loginButton;
-//    @InjectView(R.id.link_forgotPass)
-//    TextView _forgotPassLink;
+    @InjectView(R.id.btn_login)          Button _loginButton;
+    @InjectView(R.id.link_forgotPass)    TextView _forgotPassLink;
     @InjectView(R.id.link_signup)        TextView _signupLink;
 //    @InjectView(R.id.link_updateMacAddress)    TextView _registerDeviceLink;
 
@@ -55,6 +52,8 @@ public class LogInActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
+
+        ButterKnife.inject(this);
 
         this.setTitle("Log In");
 
@@ -76,8 +75,6 @@ public class LogInActivity extends AppCompatActivity {
 
         GlobalVariable.checkConnected(LogInActivity.this);
 
-        ButterKnife.inject(this);
-
         _loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,15 +82,15 @@ public class LogInActivity extends AppCompatActivity {
             }
         });
 
-//        _forgotPassLink.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                // Start the Signup activity
-//                Intent intent = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
-//                startActivityForResult(intent, REQUEST_FORGOT_PASSWORD);
-//            }
-//        });
+        _forgotPassLink.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // Start the Forgot Password activity
+                Intent intent = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
+                startActivityForResult(intent, REQUEST_FORGOT_PASSWORD);
+            }
+        });
 
         _signupLink.setOnClickListener(new View.OnClickListener() {
 
@@ -190,8 +187,6 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     public void onLoginFailed() {
-//        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
         _loginButton.setEnabled(true);
     }
 

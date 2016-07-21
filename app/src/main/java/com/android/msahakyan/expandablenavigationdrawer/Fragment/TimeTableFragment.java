@@ -72,10 +72,6 @@ public class TimeTableFragment extends Fragment {
 
     private TableLayout[] tls = new TableLayout[3];
 
-    private CountDownTimer timer;
-
-    private boolean isServerRespond = false;
-
     public TimeTableFragment() {
         // Required empty public constructor
     }
@@ -128,55 +124,6 @@ public class TimeTableFragment extends Fragment {
         subjectSpin = (Spinner) myView.findViewById(R.id.header2);
 
         getTableLayout();
-
-        isServerRespond = false;
-        timer = new CountDownTimer(8000, 20) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                try
-                {
-                    if (isServerRespond == false)
-                    {
-                        AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
-                        String message = "Server did not respond. Please check your internet connection." +
-                                "Do you want to retry?";
-                        builder2.setMessage(message);
-                        builder2.setCancelable(true);
-
-                        builder2.setPositiveButton(
-                                "RETRY",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        getListsemesterAndLastestSemesterClassesFunction();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        builder2.setNegativeButton(
-                                "CANCEL",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Preferences.dismissLoading();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        AlertDialog alert12 = builder2.create();
-                        alert12.show();
-                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        };
-
         getListsemesterAndLastestSemesterClassesFunction();
 //        initTimeSpinner();
 
@@ -657,10 +604,53 @@ public class TimeTableFragment extends Fragment {
         }
     }
 
-    void getListClassesFunction(String semester) {
+    void getListClassesFunction(final String semester) {
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getListClassesFunction(semester);
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
         timer.start();
 
         StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
@@ -670,11 +660,12 @@ public class TimeTableFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
+                    timer.cancel();
                     Preferences.dismissLoading();
                     int messageCode = response.code();
                     JSONArray listClasses = new JSONArray(response.body().string());
-                    classSubject = new String[listClasses.length()];
 
+                    classSubject = new String[listClasses.length()];
                     for(int i = 0; i < listClasses.length(); i++)
                     {
                         classSubject[i] = listClasses.getString(i);
@@ -682,16 +673,15 @@ public class TimeTableFragment extends Fragment {
 
                     GlobalVariable.currentSubjectSelection = 0;
                     setSpinnerForSubjectView();
-
-                    System.out.print("OK");
                 }
                 catch (Exception e){
+                    Preferences.dismissLoading();
                     e.printStackTrace();
                 }
             }
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Preferences.dismissLoading();
             }
         });
     }
@@ -715,7 +705,52 @@ public class TimeTableFragment extends Fragment {
 
     void getListsemesterAndLastestSemesterClassesFunction() {
         Preferences.showLoading(context, "Setup", "Loading data from server...");
+
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getListsemesterAndLastestSemesterClassesFunction();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
         timer.start();
+
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
@@ -725,6 +760,9 @@ public class TimeTableFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
+                    timer.cancel();
+                    Preferences.dismissLoading();
+
                     int messageCode = response.code();
                     JSONArray listSemesters = new JSONArray(response.body().string());
                     String lastSmt = listSemesters.getString(listSemesters.length() - 1);
@@ -733,13 +771,14 @@ public class TimeTableFragment extends Fragment {
                     getTimeTableNextKDays(7);
                 }
                 catch (Exception e) {
+                    Preferences.dismissLoading();
                     e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Preferences.dismissLoading();
             }
         });
     }
@@ -785,7 +824,52 @@ public class TimeTableFragment extends Fragment {
 
     void getTimeTableNextKDays(int k) {
         Preferences.showLoading(context, "Initialize", "Loading data from server...");
+
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getTimeTableNextKDays(7);
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
         timer.start();
+
         SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
         String auCode = pref.getString("authorizationCode", null);
 
@@ -797,22 +881,21 @@ public class TimeTableFragment extends Fragment {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
                     timer.cancel();
-                    isServerRespond = true;
                     Preferences.dismissLoading();
                     int messageCode = response.code();
                     GlobalVariable.currentTimetable = new JSONObject(response.body().string());
                     GlobalVariable.currentSubjectSelection = 0;
                     subjectSpin.setSelection(GlobalVariable.currentSubjectSelection);
                     loadRecord();
-                    System.out.print("OK");
                 }
                 catch (Exception e){
+                    Preferences.dismissLoading();
                     e.printStackTrace();
                 }
             }
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Preferences.dismissLoading();
             }
         });
     }
