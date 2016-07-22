@@ -24,6 +24,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.estimote.sdk.Beacon;
@@ -658,6 +660,30 @@ public class DetailedInformationActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean result) {
             if(result){
                 setButtonsVisible();
+            }
+            else
+            {
+                TextView notification = new TextView(getApplicationContext());
+                notification.setText("This subject is not available to take attendance now.");
+                notification.setTextSize(16);
+                notification.setTextColor(Color.RED);
+                notification.setGravity(Gravity.CENTER);
+
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                notification.setLayoutParams(params);
+
+                GradientDrawable gd = new GradientDrawable();
+                gd.setColor(0xFFFFFFFF);
+                gd.setCornerRadius(5);
+                gd.setStroke(1, 0xFFCC0000);
+                notification.setBackgroundDrawable(gd);
+
+                LinearLayout display = (LinearLayout) findViewById(R.id.layout_report);
+                display.removeAllViews();
+                display.addView(
+                        notification
+                );
+
             }
         }
     }

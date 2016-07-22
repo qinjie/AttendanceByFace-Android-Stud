@@ -1,11 +1,14 @@
 package com.android.msahakyan.expandablenavigationdrawer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -57,6 +60,8 @@ public class MainActivity extends ActionBarActivity {
     private List<String> mExpandableListTitle;
     private Map<String, List<String>> mExpandableListData;
 
+    private boolean bStudentInfo = false;
+
     private ListView mDrawList;
 
     @Override
@@ -82,38 +87,7 @@ public class MainActivity extends ActionBarActivity {
         textTime.setText(stringTime);
         //- Update time
 
-        //+ Update student email
-        Preferences.showLoading(this, "Setup", "Loading data from server...");
-        SharedPreferences pref = this.getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.getStudentProfile();
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Preferences.dismissLoading();
-                    int messageCode = response.code();
-                    GlobalVariable.currentUserProfile = new JSONObject(response.body().string());
-
-                    TextView email = (TextView) listHeaderView.findViewById(R.id.email);
-                    email.setText(GlobalVariable.currentUserProfile.getString("email"));
-
-                    mExpandableListView.addHeaderView(listHeaderView);
-                    // Customize header view
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
-        //- Update student email
+        getStudentInformation();
 
         mExpandableListData = ExpandableListDataSource.getData(this);
         mExpandableListTitle = new ArrayList(mExpandableListData.keySet());
@@ -135,6 +109,91 @@ public class MainActivity extends ActionBarActivity {
 
     void getStudentInformation() {
 
+        final CountDownTimer timer = new CountDownTimer(8000, 20) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                try
+                {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(getApplicationContext());
+                    String message = "Server did not respond. Please check your internet connection." +
+                            "Do you want to retry?";
+                    builder2.setMessage(message);
+                    builder2.setCancelable(true);
+
+                    builder2.setPositiveButton(
+                            "RETRY",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getStudentInformation();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    builder2.setNegativeButton(
+                            "CANCEL",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Preferences.dismissLoading();
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert12 = builder2.create();
+                    alert12.show();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        timer.start();
+
+        // Customize header view
+        LayoutInflater inflater = getLayoutInflater();
+        final View listHeaderView = inflater.inflate(R.layout.nav_header, null, false);
+
+        //+ Update student email
+        Preferences.showLoading(this, "Setup", "Loading data from server...");
+        SharedPreferences pref = this.getSharedPreferences("ATK_pref", 0);
+        String auCode = pref.getString("authorizationCode", null);
+
+        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+        Call<ResponseBody> call = client.getStudentProfile();
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    bStudentInfo = true;
+                    timer.cancel();
+                    Preferences.dismissLoading();
+                    int messageCode = response.code();
+                    GlobalVariable.currentUserProfile = new JSONObject(response.body().string());
+
+                    TextView email = (TextView) listHeaderView.findViewById(R.id.email);
+                    email.setText(GlobalVariable.currentUserProfile.getString("email"));
+
+                    mExpandableListView.addHeaderView(listHeaderView);
+                    // Customize header view
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                    Preferences.dismissLoading();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Preferences.dismissLoading();
+            }
+        });
+        //- Update student email
     }
 
     private void updateUserProfile()
@@ -302,6 +361,11 @@ public class MainActivity extends ActionBarActivity {
 
         // Activate the navigation drawer toggle
         if (mDrawerToggle.onOptionsItemSelected(item)) {
+            if (!bStudentInfo)
+            {
+                getStudentInformation();
+            }
+
             return true;
         }
 
