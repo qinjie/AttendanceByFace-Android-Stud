@@ -293,19 +293,42 @@ public class FaceTrainingFragment extends Fragment {
         Activity activity = this.getActivity();
         GlobalVariable.resizeImage(activity, mCurrentPhotoPath);
 
-        TrainThread trainThread = new TrainThread(mCurrentPhotoPath, context);
-        trainThread.start();
+        TrainThread trainThread;
+        //TODO: get if resetAllFace checkbox is checked
+        // if it is checked, call:
+//             trainThread = new TrainThread(mCurrentPhotoPath, context, true);
+        // else:
+//             trainThread = new TrainThread(mCurrentPhotoPath, context, false);
+//        trainThread.start();
+    }
+
+    ArrayList<String> getTrainedImageList() {
+
+        ArrayList<String> list = new ArrayList<>();
+
+        SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
+        int currIndex = pref.getInt("indexFaceList", -1);
+        for(int i = currIndex; i >= 0; i--) {
+            list.add(pref.getString("FaceList" + i, ""));
+        }
+        for(int i = GlobalVariable.maxLengthFaceList - 1; i > currIndex; i--) {
+            list.add(pref.getString("FaceList" + i, ""));
+        }
+
+        return list;
     }
 }
 
-class TrainThread extends Thread{
+class TrainThread extends Thread {
     Thread t;
     String mCurrentPhotoPath = null;
     Activity activity;
+    boolean removeAll;
 
-    public TrainThread(String _mCurrentPhotoPath, Activity _activity){
+    public TrainThread(String _mCurrentPhotoPath, Activity _activity, boolean _removeAll){
         mCurrentPhotoPath = _mCurrentPhotoPath;
-        activity = _activity ;
+        activity = _activity;
+        removeAll = _removeAll;
     }
 
     public void run(){
@@ -325,7 +348,7 @@ class TrainThread extends Thread{
             if (personID.compareTo("") != 0) { //this person has been trained before
 
                 ArrayList faceIDList = getThisFaceIDList(auCode);
-                faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID);
+                faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID, removeAll);
                 postFaceIDListtoLocalServer(auCode, faceIDList);
             } else {
                 personID = create1Person(httpRequests, newFaceID);
@@ -393,18 +416,25 @@ class TrainThread extends Thread{
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    ArrayList substitute1FacefromPerson(HttpRequests httpRequests, String personID, ArrayList faceIDList, String newFaceID){
+    ArrayList substitute1FacefromPerson(HttpRequests httpRequests, String personID, ArrayList faceIDList, String newFaceID, boolean removeAll){
 
         try {
 
             // get the earliest faceID in the list, that is the faceID with index 0
-            if (faceIDList != null && faceIDList.size() == GlobalVariable.maxLengthFaceList) {
-                String oldFaceID = faceIDList.get(0).toString();
-                // remove it on Face++
-                PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(oldFaceID);
+            if(removeAll) {
+                PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId("all");
                 httpRequests.personRemoveFace(postParameters);
-                // remove it on the list
-                faceIDList.remove(0);
+                faceIDList = null;
+            }
+            else {
+                if (faceIDList != null && faceIDList.size() == GlobalVariable.maxLengthFaceList) {
+                    String oldFaceID = faceIDList.get(0).toString();
+                    // remove it on Face++
+                    PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(oldFaceID);
+                    httpRequests.personRemoveFace(postParameters);
+                    // remove it on the list
+                    faceIDList.remove(0);
+                }
             }
 
             // add 1 face on Face++

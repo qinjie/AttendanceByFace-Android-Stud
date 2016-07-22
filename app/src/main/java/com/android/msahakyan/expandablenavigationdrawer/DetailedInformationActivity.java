@@ -718,7 +718,7 @@ class VerifyThread extends Thread{
             String faceID = GlobalVariable.get1FaceID(activity, httpRequests, imgFile);
             if(faceID != null) {
                 double result = getVerification(httpRequests, personID, faceID);
-                final JSONObject serverResult = sendResultToLocalServer(result);
+                final JSONObject serverResult = sendResultToLocalServer(result, faceID);
 
                 try {
                     String record_at = serverResult.getString("recorded_at");
@@ -768,14 +768,14 @@ class VerifyThread extends Thread{
         Preferences.dismissLoading();
     }
 
-    JSONObject sendResultToLocalServer(double result) {
+    JSONObject sendResultToLocalServer(double result, String face_id) {
 
         int currentIndex = GlobalVariable.scheduleManager.currentLessionIndex;
         JSONArray schedule = GlobalVariable.scheduleManager.getDailySchedule();
         try {
             int timetableID = ((JSONObject) schedule.get(currentIndex)).getInt("timetable_id");
 
-            TakeAttendanceClass toUp = new TakeAttendanceClass(timetableID, result);
+            TakeAttendanceClass toUp = new TakeAttendanceClass(timetableID, result, face_id);
 
             SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
             String auCode = pref.getString("authorizationCode", null);
@@ -788,6 +788,7 @@ class VerifyThread extends Thread{
             if(resCode == 200) { // successful
                 String resStr = response.body().string();
                 JSONObject resJson = new JSONObject(resStr);
+                saveImageURL();
                 Notification.showMessage(activity, 1);
                 return (resJson);
             }
@@ -805,6 +806,17 @@ class VerifyThread extends Thread{
             ErrorClass.showError(activity, 19);
         }
         return null;
+    }
+
+    void saveImageURL() {
+        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
+        int lastIndex = pref.getInt("indexFaceList", -1);
+        int currIndex = lastIndex + 1 >= GlobalVariable.maxLengthFaceList ? 0 : lastIndex + 1;
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("FaceList" + currIndex, mCurrentPhotoPath);
+        editor.putInt("indexFaceList", currIndex);
+        editor.apply();
     }
 
     private double getVerification(HttpRequests httpRequests, String personID, String faceID) {
