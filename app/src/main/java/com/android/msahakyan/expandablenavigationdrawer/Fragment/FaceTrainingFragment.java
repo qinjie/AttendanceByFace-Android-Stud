@@ -5,7 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -14,9 +19,18 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.FrameLayout;
+import android.widget.ImageSwitcher;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
+import android.widget.ViewSwitcher;
 
+import com.android.msahakyan.expandablenavigationdrawer.BaseClass.OnSwipeTouchListener;
 import com.android.msahakyan.expandablenavigationdrawer.R;
 import com.facepp.http.HttpRequests;
 import com.facepp.http.PostParameters;
@@ -61,7 +75,7 @@ public class FaceTrainingFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private int count = 0;
+    private static final int numOfTrainedImage = 5;
 
     Activity context;
 
@@ -71,10 +85,19 @@ public class FaceTrainingFragment extends Fragment {
 
     private Button mTrainingBtn = null;
 
+    private CheckBox checkBox;
+
+    private boolean isReset = false;
+
     private static final int numOfInstruction = 4;
 
+    private ArrayList<String> trainingImages;
+
+    private ImageSwitcher imageSwitcher;
 
     private OnFragmentInteractionListener mListener;
+
+    private int currentIndex = -1;
 
     public FaceTrainingFragment() {
         // Required empty public constructor
@@ -190,8 +213,120 @@ public class FaceTrainingFragment extends Fragment {
             }
         });
 
+        imageSwitcher = (ImageSwitcher) myView.findViewById(R.id.imageSwitcher);
+        try
+        {
+            // Declare the animations and initialize them
+            Animation in = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
+            Animation out = AnimationUtils.loadAnimation(context, android.R.anim.fade_out);
+
+            // set the animation type to imageSwitcher
+            imageSwitcher.setInAnimation(in);
+            imageSwitcher.setOutAnimation(out);
+
+            imageSwitcher.setOnTouchListener(new OnSwipeTouchListener(context)
+            {
+                public void onSwipeRight() {
+                    currentIndex--;
+                    updateImageSwitcher();
+                };
+                public void onSwipeLeft() {
+                    currentIndex++;
+                    updateImageSwitcher();
+                };
+            });
+
+            imageSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
+                @Override
+                public View makeView() {
+                    ImageView imageView = new ImageView(context);
+                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT);
+                    imageView.setLayoutParams(layoutParams);
+
+                    return imageView;
+                }
+            });
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        loadTrainImage();
+        updateImageSwitcher();
+
+        checkBox = (CheckBox) myView.findViewById(R.id.item_check);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkBox.isChecked())
+                {
+                    isReset = true;
+                }
+                else {
+                    isReset = false;
+                }
+            }
+        });
+
         return myView;
     }
+
+    private boolean loadTrainImage()
+    {
+        trainingImages = getTrainedImageList();
+        if (trainingImages.get(0).compareTo("") != 0)
+        {
+            currentIndex = 0;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void updateImageSwitcher()
+    {
+        try
+        {
+            if (currentIndex == numOfTrainedImage)
+            {
+                currentIndex = 0;
+            }
+            else if (currentIndex == -1)
+            {
+                currentIndex = numOfTrainedImage - 1;
+            }
+
+            File imgFile = null;
+            if (trainingImages.get(currentIndex).compareTo("") != 0)
+            {
+                imgFile = new File(trainingImages.get(currentIndex));
+                if(imgFile.exists()){
+                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    Drawable drawable = new BitmapDrawable(myBitmap);
+                    imageSwitcher.setImageDrawable(drawable);
+                }
+                else
+                {
+                    ErrorClass.showError(context, 42);
+                }
+            }
+            else
+            {
+                imageSwitcher.setImageDrawable(getResources().getDrawable(R.drawable.untrained_image));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -293,13 +428,17 @@ public class FaceTrainingFragment extends Fragment {
         Activity activity = this.getActivity();
         GlobalVariable.resizeImage(activity, mCurrentPhotoPath);
 
-        TrainThread trainThread;
-        //TODO: get if resetAllFace checkbox is checked
-        // if it is checked, call:
-//             trainThread = new TrainThread(mCurrentPhotoPath, context, true);
-        // else:
-//             trainThread = new TrainThread(mCurrentPhotoPath, context, false);
-//        trainThread.start();
+        if (isReset == true)
+        {
+            checkBox.setChecked(!checkBox.isChecked());
+            new trainTask().execute(true);
+
+        }
+        else
+        {
+            new trainTask().execute(false);
+        }
+
     }
 
     ArrayList<String> getTrainedImageList() {
@@ -317,175 +456,179 @@ public class FaceTrainingFragment extends Fragment {
 
         return list;
     }
-}
 
-class TrainThread extends Thread {
-    Thread t;
-    String mCurrentPhotoPath = null;
-    Activity activity;
-    boolean removeAll;
 
-    public TrainThread(String _mCurrentPhotoPath, Activity _activity, boolean _removeAll){
-        mCurrentPhotoPath = _mCurrentPhotoPath;
-        activity = _activity;
-        removeAll = _removeAll;
-    }
+    private class trainTask extends AsyncTask<Boolean, Void, Void> {
+        boolean removeAll;
 
-    public void run(){
+        @Override
+        protected Void doInBackground(Boolean... toRemoveAll) {
+            removeAll = toRemoveAll[0];
 
-        Preferences.showLoading(activity, "Training on progress ...", "");
+            Preferences.showLoading(getActivity(), "Training on progress ...", "");
 
-        HttpRequests httpRequests = new HttpRequests(GlobalVariable.apiKey, GlobalVariable.apiSecret);
-        File imgFile = new File(mCurrentPhotoPath);
+            HttpRequests httpRequests = new HttpRequests(GlobalVariable.apiKey, GlobalVariable.apiSecret);
+            File imgFile = new File(mCurrentPhotoPath);
 
-        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
+            SharedPreferences pref = getActivity().getSharedPreferences("ATK_pref", 0);
+            String auCode = pref.getString("authorizationCode", null);
 
-        String newFaceID = GlobalVariable.get1FaceID(activity, httpRequests, imgFile);
+            String newFaceID = GlobalVariable.get1FaceID(getActivity(), httpRequests, imgFile);
             if(newFaceID != null) {
-            String personID = GlobalVariable.getThisPersonID(activity, auCode);
+                String personID = GlobalVariable.getThisPersonID(getActivity(), auCode);
 
-            if (personID.compareTo("") != 0) { //this person has been trained before
+                if (personID.compareTo("") != 0) { //this person has been trained before
 
-                ArrayList faceIDList = getThisFaceIDList(auCode);
-                faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID, removeAll);
-                postFaceIDListtoLocalServer(auCode, faceIDList);
-            } else {
-                personID = create1Person(httpRequests, newFaceID);
-                postPersonIDtoLocalServer(auCode, personID);
-                ArrayList<String> faceIDList = new ArrayList<String>();
-                faceIDList.add(newFaceID);
-                postFaceIDListtoLocalServer(auCode, faceIDList);
+                    ArrayList faceIDList = getThisFaceIDList(auCode);
+                    faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID, removeAll);
+                    postFaceIDListtoLocalServer(auCode, faceIDList);
+                } else {
+                    personID = create1Person(httpRequests, newFaceID);
+                    postPersonIDtoLocalServer(auCode, personID);
+                    ArrayList<String> faceIDList = new ArrayList<String>();
+                    faceIDList.add(newFaceID);
+                    postFaceIDListtoLocalServer(auCode, faceIDList);
+                }
+                //Show notification about sucessful training
+                GlobalVariable.saveImageURL(getActivity(), mCurrentPhotoPath);
+                Notification.showMessage(getActivity(), 0);
+
             }
-            //Show notification about sucessful training
-            Notification.showMessage(activity, 0);
 
+            Preferences.dismissLoading();
+
+            return null;
         }
 
-        Preferences.dismissLoading();
-    }
-
-    void postPersonIDtoLocalServer(String auCode, String personID){
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.postPersonID(personID);
-
-        try{
-            Response<ResponseBody> response = call.execute();
-            int messageCode = response.code();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            ErrorClass.showError(activity, 18);
+        @Override
+        protected void onPostExecute(Void voids) {
+            loadTrainImage();
         }
 
-    }
 
-    String create1Person(HttpRequests httpRequests, String faceID){
-        String personID = null;
-
-        try {
-            PostParameters postParameters = new PostParameters().setFaceId(faceID);
-            JSONObject person = httpRequests.personCreate(postParameters);
-            personID = person.getString("person_id");
-
-            postParameters = new PostParameters().setPersonId(personID);
-            httpRequests.trainVerify(postParameters);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            ErrorClass.showError(activity, 16);
-        }
-
-        return personID;
-    }
-
-    void postFaceIDListtoLocalServer(String auCode, ArrayList<String> faceIDList) {
-        try {
+        void postPersonIDtoLocalServer(String auCode, String personID){
             StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-            Call<ResponseBody> call = client.postFaceIDList(faceIDList);
-            Response<ResponseBody> response = call.execute();
-            int messageCode = response.code();
-            if(messageCode != 200) {
-                ErrorClass.showError(activity, 15);
+            Call<ResponseBody> call = client.postPersonID(personID);
+
+            try{
+                Response<ResponseBody> response = call.execute();
+                int messageCode = response.code();
             }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            ErrorClass.showError(activity, 14);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    ArrayList substitute1FacefromPerson(HttpRequests httpRequests, String personID, ArrayList faceIDList, String newFaceID, boolean removeAll){
-
-        try {
-
-            // get the earliest faceID in the list, that is the faceID with index 0
-            if(removeAll) {
-                PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId("all");
-                httpRequests.personRemoveFace(postParameters);
-                faceIDList = null;
+            catch(Exception e){
+                e.printStackTrace();
+                ErrorClass.showError(getActivity(), 3);
             }
-            else {
-                if (faceIDList != null && faceIDList.size() == GlobalVariable.maxLengthFaceList) {
-                    String oldFaceID = faceIDList.get(0).toString();
-                    // remove it on Face++
-                    PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(oldFaceID);
-                    httpRequests.personRemoveFace(postParameters);
-                    // remove it on the list
-                    faceIDList.remove(0);
+
+        }
+
+        String create1Person(HttpRequests httpRequests, String faceID){
+            String personID = null;
+
+            try {
+                PostParameters postParameters = new PostParameters().setFaceId(faceID);
+                JSONObject person = httpRequests.personCreate(postParameters);
+                personID = person.getString("person_id");
+
+                postParameters = new PostParameters().setPersonId(personID);
+                httpRequests.trainVerify(postParameters);
+            }
+            catch (Exception e){
+                e.printStackTrace();
+                ErrorClass.showError(getActivity(), 3);
+            }
+
+            return personID;
+        }
+
+        void postFaceIDListtoLocalServer(String auCode, ArrayList<String> faceIDList) {
+            try {
+                StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+                Call<ResponseBody> call = client.postFaceIDList(faceIDList);
+                Response<ResponseBody> response = call.execute();
+                int messageCode = response.code();
+                if(messageCode != 200) {
+                    ErrorClass.showError(getActivity(), 3);
                 }
             }
+            catch(Exception e) {
+                e.printStackTrace();
+                ErrorClass.showError(getActivity(), 3);
+            }
+        }
 
-            // add 1 face on Face++
-            PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(newFaceID);
-            httpRequests.personAddFace(postParameters);
-            // add 1 face on the list
-            if (faceIDList != null)
-                faceIDList.add(newFaceID);
-            else {
-                faceIDList = new ArrayList();
-                faceIDList.add(newFaceID);
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        ArrayList substitute1FacefromPerson(HttpRequests httpRequests, String personID, ArrayList faceIDList, String newFaceID, boolean removeAll){
+
+            try {
+
+                // get the earliest faceID in the list, that is the faceID with index 0
+                if(removeAll) {
+                    PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId("all");
+                    httpRequests.personRemoveFace(postParameters);
+                    faceIDList = null;
+                }
+                else {
+                    if (faceIDList != null && faceIDList.size() == GlobalVariable.maxLengthFaceList) {
+                        String oldFaceID = faceIDList.get(0).toString();
+                        // remove it on Face++
+                        PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(oldFaceID);
+                        httpRequests.personRemoveFace(postParameters);
+                        // remove it on the list
+                        faceIDList.remove(0);
+                    }
+                }
+
+                // add 1 face on Face++
+                PostParameters postParameters = new PostParameters().setPersonId(personID).setFaceId(newFaceID);
+                httpRequests.personAddFace(postParameters);
+                // add 1 face on the list
+                if (faceIDList != null)
+                    faceIDList.add(newFaceID);
+                else {
+                    faceIDList = new ArrayList();
+                    faceIDList.add(newFaceID);
+                }
+
+                //re-train person on Face++
+                postParameters = new PostParameters().setPersonId(personID);
+                httpRequests.trainVerify(postParameters);
+
+                return faceIDList;
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                ErrorClass.showError(getActivity(), 3);
             }
 
-            //re-train person on Face++
-            postParameters = new PostParameters().setPersonId(personID);
-            httpRequests.trainVerify(postParameters);
-
-            return faceIDList;
-
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            ErrorClass.showError(activity, 13);
+            return null;
         }
 
-        return null;
+        ArrayList getThisFaceIDList(String auCode) {
+
+            ArrayList<String> result = null;
+
+            StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+            Call<ResponseBody> call = client.getFaceIDList();
+
+            try {
+                Response<ResponseBody> response = call.execute();
+                JSONObject data = new JSONObject(response.body().string());
+                JSONArray arr = data.getJSONArray("face_id");
+
+                result = new ArrayList<String>();
+                for (int i = 0; i < arr.length(); i++)
+                    result.add(arr.getString(i).toString());
+
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+                ErrorClass.showError(getActivity(), 3);
+            }
+
+            return result;
+
+        }
     }
 
-    ArrayList getThisFaceIDList(String auCode) {
-
-        ArrayList<String> result = null;
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.getFaceIDList();
-
-        try {
-            Response<ResponseBody> response = call.execute();
-            JSONObject data = new JSONObject(response.body().string());
-            JSONArray arr = data.getJSONArray("face_id");
-
-            result = new ArrayList<String>();
-            for (int i = 0; i < arr.length(); i++)
-                result.add(arr.getString(i).toString());
-
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            ErrorClass.showError(activity, 12);
-        }
-
-        return result;
-
-    }
 }

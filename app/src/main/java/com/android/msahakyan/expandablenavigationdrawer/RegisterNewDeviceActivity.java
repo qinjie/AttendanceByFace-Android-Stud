@@ -90,13 +90,13 @@ public class RegisterNewDeviceActivity extends AppCompatActivity {
                     catch (Exception e){}
                 }
                 else{
-                    ErrorClass.showError(RegisterNewDeviceActivity.this, 34);
+                    ErrorClass.showError(RegisterNewDeviceActivity.this, 3);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(RegisterNewDeviceActivity.this, 35);
+                ErrorClass.showError(RegisterNewDeviceActivity.this, 3);
             }
         });
 

@@ -15,19 +15,30 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Latest Training Image"
-            android:textSize="25dp"
+            android:text="Latest Training Images"
+            android:textSize="20dp"
             android:gravity="center"
             android:layout_centerHorizontal="true"
             android:textColor="@android:color/background_dark"
+            android:layout_marginBottom="10dp"
             android:id="@+id/text"/>
 
-        <ImageView
+        <ImageSwitcher
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/text"
+            android:id="@+id/imageSwitcher"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/item_check"
+            android:layout_below="@id/text">
+        </ImageSwitcher>
+
+        <CheckBox
+            android:id="@+id/item_check"
+            android:text="@string/action_resetTraining"
             android:layout_above="@+id/btn_training"
-            android:layout_marginTop="10dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="itemClicked" />
 
         <Button
             android:layout_width="wrap_content"
@@ -39,29 +50,5 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"/>
     </RelativeLayout>
-
-        <!--<ScrollView-->
-            <!--android:id="@+id/layout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_below="@+id/titleLayout"-->
-            <!--android:layout_above="@+id/instruction_layout"-->
-            <!--android:fillViewport="true"-->
-            <!--android:scrollbarStyle="insideOverlay"-->
-            <!--android:orientation="horizontal"-->
-            <!--android:scrollbars="horizontal|vertical"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:layout_marginTop="10dp">-->
-
-            <!--<TableLayout-->
-                <!--android:id="@+id/tableLayout"-->
-                <!--android:orientation="vertical"-->
-                <!--android:layout_margin="1dp"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content">-->
-            <!--</TableLayout>-->
-
-        <!--</ScrollView>-->
-
 
 </FrameLayout>

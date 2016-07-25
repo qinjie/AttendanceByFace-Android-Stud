@@ -58,17 +58,6 @@ public class LogInActivity extends AppCompatActivity {
         this.setTitle("Log In");
 
         if (GlobalVariable.obtainedAuCode(this)) {
-
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("ATK_pref", 0);
-            String data = pref.getString("fullTimetable", null);
-            try {
-                JSONArray temp = new JSONArray(data);
-                GlobalVariable.scheduleManager.setSchedule(temp);
-            } catch (Exception e) {
-                e.printStackTrace();
-                ErrorClass.showError(this, 17);
-            }
-
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
@@ -227,6 +216,7 @@ public class LogInActivity extends AppCompatActivity {
                     int messageCode = response.code();
 
                     if (messageCode == 200) {
+                        onLoginSuccess();
                         JSONObject data = new JSONObject(response.body().string());
                         String authorizationCode = data.getString("token");
                         GlobalVariable.setAuCodeInSP(LogInActivity.this, authorizationCode);
@@ -240,12 +230,12 @@ public class LogInActivity extends AppCompatActivity {
                         onLoginFailed();
                     }
                     else{
-                        ErrorClass.showError(LogInActivity.this, 1);
+                        ErrorClass.showError(LogInActivity.this, 3);
                         onLoginFailed();
                     }
                 } catch (Exception e) {
                     System.out.print("Exception caught Login");
-                    ErrorClass.showError(LogInActivity.this, 2);
+                    ErrorClass.showError(LogInActivity.this, 3);
                     onLoginFailed();
                 }
             }

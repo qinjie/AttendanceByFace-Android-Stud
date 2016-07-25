@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import com.android.msahakyan.expandablenavigationdrawer.Preferences;
 import com.facepp.http.HttpRequests;
 import com.facepp.http.PostParameters;
 
@@ -24,8 +23,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import android.content.SharedPreferences;
 
 import com.android.msahakyan.expandablenavigationdrawer.LogInActivity;
 
@@ -98,7 +95,7 @@ public class GlobalVariable {
             out.close();
         }
         catch(Exception e){
-            ErrorClass.showError(activity, 5);
+            ErrorClass.showError(activity, 3);
             e.printStackTrace();
         }
     }
@@ -107,86 +104,6 @@ public class GlobalVariable {
         SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
         String timeTable = pref.getString("fullTimeTable", null);
         return timeTable != null;
-    }
-
-    public static void checkLoggedin(final Activity activity) {
-        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.getPersonID();
-
-        boolean result = false;
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    if (response.code() != 200) {
-                        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putString("authorizationCode", null);
-                        editor.apply();
-
-                        Intent intent = new Intent(activity, LogInActivity.class);
-                        activity.startActivity(intent);
-                    }
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                    ErrorClass.showError(activity, 6);
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(activity, 7);
-            }
-        });
-    }
-
-    public static void loadTimetableByWeek(final Activity activity) {
-
-        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.getTimetableByWeek();
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    JSONObject data = new JSONObject(response.body().string());
-                    System.out.print("OK!");
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                    ErrorClass.showError(activity, 8);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(activity, 9);
-            }
-        });
-
-    }
-
-    public static void getFullTimeTable(Activity activity) {
-        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        String data = pref.getString("fullTimetable", "[]");
-        try {
-            JSONArray temp = new JSONArray(data);
-            GlobalVariable.scheduleManager.setSchedule(temp);
-        }
-        catch (Exception e)
-        {
-            ErrorClass.showError(activity, 0);
-            e.printStackTrace();
-        }
     }
 
     public static boolean obtainedAuCode (Activity activity) {
@@ -219,7 +136,7 @@ public class GlobalVariable {
         }
         catch(Exception e){
             e.printStackTrace();
-            ErrorClass.showError(activity, 10);
+            ErrorClass.showError(activity, 3);
         }
 
         return personID;
@@ -234,10 +151,10 @@ public class GlobalVariable {
         }
         catch(Exception e){
             e.printStackTrace();
-            ErrorClass.showError(activity, 11);
+            ErrorClass.showError(activity, 3);
         }
         if(faceID == null) {
-            ErrorClass.showError(activity, 30);
+            ErrorClass.showError(activity, 3);
         }
         return faceID;
     }
@@ -277,19 +194,14 @@ public class GlobalVariable {
         }
     }
 
-    public static void logoutAction(Activity activity){
+    public static void saveImageURL(Activity activity, String mCurrentPhotoPath) {
         SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
+        int lastIndex = pref.getInt("indexFaceList", -1);
+        int currIndex = lastIndex + 1 >= GlobalVariable.maxLengthFaceList ? 0 : lastIndex + 1;
 
         SharedPreferences.Editor editor = pref.edit();
-        editor.clear();
+        editor.putString("FaceList" + currIndex, mCurrentPhotoPath);
+        editor.putInt("indexFaceList", currIndex);
         editor.apply();
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.logout();
-
-        Intent intent = new Intent(activity, LogInActivity.class);
-        activity.startActivity(intent);
     }
-
 }

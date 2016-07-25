@@ -106,7 +106,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
         } catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 26);
+            ErrorClass.showError(this, 1);
         }
 
         getSubjectInformation();
@@ -192,7 +192,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
         } catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 26);
+            ErrorClass.showError(this, 1);
         }
     }
 
@@ -232,7 +232,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
         catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 25);
+            ErrorClass.showError(this, 1);
         }
 
         return result;
@@ -328,14 +328,14 @@ public class DetailedInformationActivity extends AppCompatActivity {
                 } catch (Exception e)
                 {
                     e.printStackTrace();
-                    ErrorClass.showError(this, 29);
+                    ErrorClass.showError(this, 1);
                 }
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 24);
+            ErrorClass.showError(this, 1);
         }
     }
 
@@ -428,7 +428,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
                 } catch (Exception e)
                 {
                     e.printStackTrace();
-                    ErrorClass.showError(DetailedInformationActivity.this, 23);
+                    ErrorClass.showError(DetailedInformationActivity.this, 2);
                 }
             }
         });
@@ -550,7 +550,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 ex.printStackTrace();
-                ErrorClass.showError(this, 22);
+                ErrorClass.showError(this, 0);
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -650,7 +650,7 @@ public class DetailedInformationActivity extends AppCompatActivity {
 
             }
             catch (Exception e){
-                ErrorClass.showError(DetailedInformationActivity.this, 33);
+                ErrorClass.showError(DetailedInformationActivity.this, 3);
             }
 
             return (result.compareTo("true") == 0);
@@ -758,7 +758,7 @@ class VerifyThread extends Thread{
                         });
                     }
                 } catch (Exception e) {
-                    ErrorClass.showError(activity, 31);
+                    ErrorClass.showError(activity, 3);
                 }
             }
         }
@@ -788,7 +788,7 @@ class VerifyThread extends Thread{
             if(resCode == 200) { // successful
                 String resStr = response.body().string();
                 JSONObject resJson = new JSONObject(resStr);
-                saveImageURL();
+                GlobalVariable.saveImageURL(activity, mCurrentPhotoPath);
                 Notification.showMessage(activity, 1);
                 return (resJson);
             }
@@ -797,26 +797,15 @@ class VerifyThread extends Thread{
                 return null;
             }
             else {
-                ErrorClass.showError(activity, 20);
+                ErrorClass.showError(activity, 3);
                 return null;
             }
         }
         catch(Exception e) {
             e.printStackTrace();
-            ErrorClass.showError(activity, 19);
+            ErrorClass.showError(activity, 3);
         }
         return null;
-    }
-
-    void saveImageURL() {
-        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
-        int lastIndex = pref.getInt("indexFaceList", -1);
-        int currIndex = lastIndex + 1 >= GlobalVariable.maxLengthFaceList ? 0 : lastIndex + 1;
-
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("FaceList" + currIndex, mCurrentPhotoPath);
-        editor.putInt("indexFaceList", currIndex);
-        editor.apply();
     }
 
     private double getVerification(HttpRequests httpRequests, String personID, String faceID) {
@@ -830,7 +819,7 @@ class VerifyThread extends Thread{
         }
         catch(Exception e){
             System.out.print("Process interrupted!");
-            ErrorClass.showError(activity, 21);
+            ErrorClass.showError(activity, 3);
         }
 
         return result;

@@ -251,7 +251,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
                 catch(Exception e){
                     e.printStackTrace();
-                    ErrorClass.showError(SignUpActivity.this, 27);
+                    ErrorClass.showError(SignUpActivity.this, 3);
                     Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
                     startActivity(intent);
                 }
@@ -259,7 +259,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(SignUpActivity.this, 28);
+                ErrorClass.showError(SignUpActivity.this, 3);
             }
         });
     }

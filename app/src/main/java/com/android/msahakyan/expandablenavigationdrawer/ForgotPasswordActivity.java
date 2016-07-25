@@ -156,24 +156,24 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     }
                     else if (messageCode == 400){
                         onResetPassFailed();
-                        ErrorClass.showError(ForgotPasswordActivity.this, 40);
+                        ErrorClass.showError(ForgotPasswordActivity.this, 4);
                     } else if (messageCode == 500)
                     {
                         onResetPassFailed();
-                        ErrorClass.showError(ForgotPasswordActivity.this, 41);
+                        ErrorClass.showError(ForgotPasswordActivity.this, 3);
                     }
                 }
                 catch(Exception e){
                     e.printStackTrace();
                     onResetPassFailed();
-                    ErrorClass.showError(ForgotPasswordActivity.this, 38);
+                    ErrorClass.showError(ForgotPasswordActivity.this, 3);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 onResetPassFailed();
-                ErrorClass.showError(ForgotPasswordActivity.this, 39);
+                ErrorClass.showError(ForgotPasswordActivity.this, 3);
             }
         });
     }

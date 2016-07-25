@@ -268,7 +268,7 @@ public class ChangePasswordFragment extends Fragment {
                             Notification.showMessage(context, 9);
                         onChangePasswordFailed();
                     } else {
-                        ErrorClass.showError(context, 36);
+                        ErrorClass.showError(context, 3);
                         onChangePasswordFailed();
                     }
                 }
@@ -282,7 +282,7 @@ public class ChangePasswordFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(context, 37);
+                ErrorClass.showError(context, 3);
                 timer.cancel();
                 onChangePasswordFailed();
             }
