@@ -95,7 +95,6 @@ public class GlobalVariable {
             out.close();
         }
         catch(Exception e){
-            ErrorClass.showError(activity, 3);
             e.printStackTrace();
         }
     }
@@ -136,7 +135,6 @@ public class GlobalVariable {
         }
         catch(Exception e){
             e.printStackTrace();
-            ErrorClass.showError(activity, 3);
         }
 
         return personID;
@@ -151,10 +149,9 @@ public class GlobalVariable {
         }
         catch(Exception e){
             e.printStackTrace();
-            ErrorClass.showError(activity, 3);
         }
         if(faceID == null) {
-            ErrorClass.showError(activity, 3);
+
         }
         return faceID;
     }
@@ -203,5 +200,20 @@ public class GlobalVariable {
         editor.putString("FaceList" + currIndex, mCurrentPhotoPath);
         editor.putInt("indexFaceList", currIndex);
         editor.apply();
+    }
+
+    void logoutAction(Activity activity){
+        SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
+        String auCode = pref.getString("authorizationCode", null);
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+
+        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+        Call<ResponseBody> call = client.logout();
+
+        Intent intent = new Intent(activity, LogInActivity.class);
+        activity.startActivity(intent);
     }
 }

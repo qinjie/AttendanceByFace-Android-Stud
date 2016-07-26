@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.SignupClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
@@ -137,11 +136,10 @@ public class SignUpActivity extends AppCompatActivity {
         Preferences.dismissLoading();
         setResult(RESULT_OK, null);
 
-        Toast.makeText(getBaseContext(), "Signed up successfully!", Toast.LENGTH_LONG).show();
+        Notification.showMessage(SignUpActivity.this, 4);
 
         Intent intent = new Intent(SignUpActivity.this, LogInActivity.class);
         startActivity(intent);
-
     }
 
     public void onSignupFailed() {
@@ -235,23 +233,37 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-
                     int messageCode = response.code();
-                    if(messageCode == 200){
+                    if (messageCode == 200) // SUCCESS
+                    {
                         onSignupSuccess();
                     }
-                    else{
-                        // handle when cannot signup
+                    else
+                    {
                         onSignupFailed();
-                        Notification.showMessage(SignUpActivity.this, 5);
-                        Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
-                        startActivity(intent);
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+                            Notification.showMessage(SignUpActivity.this, 5);
+                            Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
+                            startActivity(intent);
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(SignUpActivity.this, 12);
+                        }
+                        else {
+
+                        }
                     }
 
                 }
                 catch(Exception e){
+                    onSignupFailed();
                     e.printStackTrace();
-                    ErrorClass.showError(SignUpActivity.this, 3);
                     Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
                     startActivity(intent);
                 }
@@ -259,7 +271,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(SignUpActivity.this, 3);
+                onSignupFailed();
             }
         });
     }

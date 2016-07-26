@@ -17,23 +17,24 @@ public class Notification {
             "You are not signed up! Please try again!", // 5
             "You must connect to the internet!", // 6
             "Password changed successfully!", // 7
-            "INCORRECT_PASSWORD", // 8
-            "INVALID_NEW_PASSWORD", // 9
+            "Incorrect password! Please try again!", // 8
+            "Invalid new password! Please try again!", // 9
             "Reset password failed! Please try again!", // 10
             "Please check your email to reset your password!", // 11
+            "Error occurred in local server! Please try again later!", //12
+            "This email is not valid! Please try again!", //13
     };
 
-    public static String [] LoginNoti = {
-            "0: CODE_INCORRECT_USERNAME",
-            "1: CODE_INCORRECT_PASSWORD",
-            "2: CODE_INCORRECT_DEVICE",
-            "3: CODE_UNVERIFIED_EMAIL",
-            "4: CODE_UNVERIFIED_DEVICE",
-            "5: CODE_UNVERIFIED_EMAIL_DEVICE",
-            "6: CODE_INVALID_ACCOUNT",
-            "7: CODE_DUPLICATE_DEVICE"
+    public static String [] badRequestNotification = {
+            "Incorrect username! Please try again!", // 0
+            "Incorrect password! Please try again!", // 1
+            "",                                      // 2
+            "Unverified email! Please try again",    // 3
+            "",                                      // 4
+            "Unverified email device",               // 5
+            "Invalid account",                       // 6
+            "Duplicate device"                       // 7
     };
-
 
     public static void showMessage(final Activity activity, final int mesCode) {
 
@@ -66,7 +67,7 @@ public class Notification {
 
     }
 
-    public static void showLoginNoti(final Activity activity, final int loginNotiCode){
+    public static void showBadRequestNotification(final Activity activity, final int notificationCode){
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +78,7 @@ public class Notification {
                         AlertDialog.Builder builder = new AlertDialog.Builder(
                                 activity);
 
-                        builder.setMessage(LoginNoti[loginNotiCode]);
+                        builder.setMessage(badRequestNotification[notificationCode]);
                         builder.setCancelable(false);
                         builder.setPositiveButton("OK",
                                 new DialogInterface.OnClickListener() {

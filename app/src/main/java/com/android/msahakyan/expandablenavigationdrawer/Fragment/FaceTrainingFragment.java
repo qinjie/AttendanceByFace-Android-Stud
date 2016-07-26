@@ -26,7 +26,6 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.ViewSwitcher;
 
@@ -44,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
@@ -308,10 +306,6 @@ public class FaceTrainingFragment extends Fragment {
                     Drawable drawable = new BitmapDrawable(myBitmap);
                     imageSwitcher.setImageDrawable(drawable);
                 }
-                else
-                {
-                    ErrorClass.showError(context, 42);
-                }
             }
             else
             {
@@ -323,10 +317,6 @@ public class FaceTrainingFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
-
-
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -399,8 +389,7 @@ public class FaceTrainingFragment extends Fragment {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                // Error occurred while creating the File
-                ErrorClass.showError(context, 4);
+                // Error occurred while creating the File;
                 ex.printStackTrace();
             }
             // Continue only if the File was successfully created
@@ -516,7 +505,6 @@ public class FaceTrainingFragment extends Fragment {
             }
             catch(Exception e){
                 e.printStackTrace();
-                ErrorClass.showError(getActivity(), 3);
             }
 
         }
@@ -534,7 +522,6 @@ public class FaceTrainingFragment extends Fragment {
             }
             catch (Exception e){
                 e.printStackTrace();
-                ErrorClass.showError(getActivity(), 3);
             }
 
             return personID;
@@ -546,13 +533,32 @@ public class FaceTrainingFragment extends Fragment {
                 Call<ResponseBody> call = client.postFaceIDList(faceIDList);
                 Response<ResponseBody> response = call.execute();
                 int messageCode = response.code();
-                if(messageCode != 200) {
-                    ErrorClass.showError(getActivity(), 3);
+
+                if (messageCode == 200) // SUCCESS
+                {
+
+                }
+                else
+                {
+                    if (messageCode == 400) // BAD REQUEST HTTP
+                    {
+
+                    }
+                    else if (messageCode == 401) // UNAUTHORIZED
+                    {
+
+                    }
+                    else if (messageCode == 500) // SERVER FAILED
+                    {
+                        Notification.showMessage(context, 12);
+                    }
+                    else {
+
+                    }
                 }
             }
             catch(Exception e) {
                 e.printStackTrace();
-                ErrorClass.showError(getActivity(), 3);
             }
         }
 
@@ -598,7 +604,6 @@ public class FaceTrainingFragment extends Fragment {
             }
             catch(Exception e){
                 e.printStackTrace();
-                ErrorClass.showError(getActivity(), 3);
             }
 
             return null;
@@ -623,7 +628,6 @@ public class FaceTrainingFragment extends Fragment {
             }
             catch(Exception e) {
                 e.printStackTrace();
-                ErrorClass.showError(getActivity(), 3);
             }
 
             return result;

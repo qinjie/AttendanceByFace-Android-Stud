@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.app.Fragment;
 
-import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,7 +21,6 @@ import retrofit2.Response;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.Preferences;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
@@ -255,34 +253,48 @@ public class ChangePasswordFragment extends Fragment {
                 try {
                     timer.cancel();
                     isServerRespond = true;
+
                     int messageCode = response.code();
-                    if (messageCode == 200) {
-                        Notification.showMessage(context, 7);
+
+                    if (messageCode == 200) // SUCCESS
+                    {
                         onChangePasswordSuccess();
-                    } else if (messageCode == 400) {
-                        JSONObject data = new JSONObject(response.errorBody().string());
-                        int errorCode = data.getInt("code");
-                        if(errorCode == 1)
-                            Notification.showMessage(context, 8);
-                        else if(errorCode == 8)
-                            Notification.showMessage(context, 9);
+                        Notification.showMessage(context, 7);
+                    }
+                    else
+                    {
                         onChangePasswordFailed();
-                    } else {
-                        ErrorClass.showError(context, 3);
-                        onChangePasswordFailed();
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+                            JSONObject data = new JSONObject(response.errorBody().string());
+                            int errorCode = data.getInt("code");
+                            if(errorCode == 1)
+                                Notification.showMessage(context, 8);
+                            else if(errorCode == 8)
+                                Notification.showMessage(context, 9);
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(context, 12);
+                        }
+                        else {
+
+                        }
                     }
                 }
                 catch (Exception e) {
-                    timer.cancel();
-                    isServerRespond = true;
                     e.printStackTrace();
+                    timer.cancel();
                     onChangePasswordFailed();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(context, 3);
                 timer.cancel();
                 onChangePasswordFailed();
             }

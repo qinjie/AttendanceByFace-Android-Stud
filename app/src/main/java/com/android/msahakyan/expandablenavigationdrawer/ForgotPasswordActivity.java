@@ -1,8 +1,6 @@
 package com.android.msahakyan.expandablenavigationdrawer;
 
-import android.content.Context;
 import android.content.DialogInterface;
-import android.net.wifi.WifiManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,10 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 import android.content.Intent;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.StringClient;
@@ -149,31 +145,41 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-
                     int messageCode = response.code();
-                    if(messageCode == 200){
+
+                    if (messageCode == 200) // SUCCESS
+                    {
                         onResetPassSuccess();
                     }
-                    else if (messageCode == 400){
-                        onResetPassFailed();
-                        ErrorClass.showError(ForgotPasswordActivity.this, 4);
-                    } else if (messageCode == 500)
+                    else
                     {
                         onResetPassFailed();
-                        ErrorClass.showError(ForgotPasswordActivity.this, 3);
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+                            Notification.showMessage(ForgotPasswordActivity.this, 13);
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+                            //TODO
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(ForgotPasswordActivity.this, 12);
+                        }
+                        else {
+
+                        }
                     }
                 }
                 catch(Exception e){
                     e.printStackTrace();
                     onResetPassFailed();
-                    ErrorClass.showError(ForgotPasswordActivity.this, 3);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 onResetPassFailed();
-                ErrorClass.showError(ForgotPasswordActivity.this, 3);
             }
         });
     }
