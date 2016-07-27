@@ -235,7 +235,7 @@ public class MainActivity extends ActionBarActivity {
                 }
                 else if (groupPosition == 4)
                 {
-                    logoutAction();
+                    GlobalVariable.logoutAction(MainActivity.this);
                     return true;
                 }
                 else
@@ -370,21 +370,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    void logoutAction(){
-        SharedPreferences pref = getSharedPreferences("ATK_pref", 0);
-        String auCode = pref.getString("authorizationCode", null);
-
-        SharedPreferences.Editor editor = pref.edit();
-        editor.clear();
-        editor.apply();
-
-        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
-        Call<ResponseBody> call = client.logout();
-
-        Intent intent = new Intent(this, LogInActivity.class);
-        startActivity(intent);
     }
 
 }

@@ -51,6 +51,7 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         ButterKnife.inject(this);
+        GlobalVariable.activity = LogInActivity.this;
 
         this.setTitle("Log In");
 
@@ -289,11 +290,12 @@ public class LogInActivity extends AppCompatActivity {
                     }
                     else
                     {
+                        onLoginFailed();
                         if (messageCode == 400) // BAD REQUEST HTTP
                         {
                             JSONObject data = new JSONObject(response.errorBody().string());
                             int errorCode = data.getInt("code");
-                            if (errorCode != 2 && errorCode != 4)
+                            if (errorCode != 2)
                             {
                                 Notification.showBadRequestNotification(LogInActivity.this, errorCode);
                             }

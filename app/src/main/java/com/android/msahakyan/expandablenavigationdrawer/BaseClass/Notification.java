@@ -26,14 +26,14 @@ public class Notification {
     };
 
     public static String [] badRequestNotification = {
-            "Incorrect username! Please try again!", // 0
-            "Incorrect password! Please try again!", // 1
-            "",                                      // 2
-            "Unverified email! Please try again",    // 3
-            "",                                      // 4
-            "Unverified email device",               // 5
-            "Invalid account",                       // 6
-            "Duplicate device"                       // 7
+            "Incorrect username! Please try again!",            // 0
+            "Incorrect password! Please try again!",            // 1
+            "",                                                 // 2
+            "Unverified email! Please try again!",              // 3
+            "Unverified device! Please try again later!",       // 4
+            "Unverified email device! Please try again later!", // 5
+            "Invalid account",                                  // 6
+            "Duplicate device"                                  // 7
     };
 
     public static void showMessage(final Activity activity, final int mesCode) {
