@@ -492,6 +492,7 @@ public class FaceTrainingFragment extends Fragment {
         @Override
         protected void onPostExecute(Void voids) {
             loadTrainImage();
+            updateImageSwitcher();
         }
 
 
