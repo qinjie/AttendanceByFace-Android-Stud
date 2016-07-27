@@ -54,6 +54,7 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         ButterKnife.inject(this);
+        GlobalVariable.activity = LogInActivity.this;
 
         this.setTitle("Log In");
 

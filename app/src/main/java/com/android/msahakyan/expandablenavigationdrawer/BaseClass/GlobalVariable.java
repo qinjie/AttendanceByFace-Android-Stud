@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
@@ -39,6 +40,7 @@ public class GlobalVariable {
     public static ScheduleManager scheduleManager = new ScheduleManager();
     public static boolean loadedTimetableToday = false;
     public static final double imageArea = 200000;
+    public static Activity activity;
 
     //+ Attendance History
     public static int currentSemester = 0;
@@ -64,6 +66,43 @@ public class GlobalVariable {
 
     //- Latest image training
 
+
+    public static void rotateImage(String _imageDir) {
+        try {
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            bounds.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(_imageDir, bounds);
+
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            Bitmap bm = BitmapFactory.decodeFile(_imageDir, opts);
+            ExifInterface exif = new ExifInterface(_imageDir);
+            String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+            int rotationAngle = 0;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+
+            Bitmap rotatedBitmap;
+            if(rotationAngle != 0) {
+                Matrix matrix = new Matrix();
+                matrix.setRotate(rotationAngle, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+                rotatedBitmap = Bitmap.createBitmap(bm, 0, 0, bounds.outWidth, bounds.outHeight, matrix, true);
+                File file = new File(_imageDir);
+                file.delete();
+                FileOutputStream out = new FileOutputStream(file);
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                out.flush();
+                out.close();
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void resizeImage(Activity activity, String mCurrentPhotoPath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -78,17 +117,6 @@ public class GlobalVariable {
         int newHeight = (int) (oldHeight * ratio);
         Bitmap resized = bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
 
-        if (newWidth > newHeight)
-        {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-
-            Bitmap rotated = Bitmap.createBitmap(resized, 0, 0, resized.getWidth(), resized.getHeight(),
-                    matrix, true);
-
-            resized = rotated;
-        }
-
         File file = new File(mCurrentPhotoPath);
         if(file.exists()) file.delete();
         try {
@@ -96,11 +124,13 @@ public class GlobalVariable {
             resized.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
+            rotateImage(mCurrentPhotoPath);
         }
         catch(Exception e){
             ErrorClass.showError(activity, 5);
             e.printStackTrace();
         }
+
     }
 
     public static boolean haveFullTimetable(Activity activity) {
