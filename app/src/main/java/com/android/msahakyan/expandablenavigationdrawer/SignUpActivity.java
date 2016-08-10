@@ -34,7 +34,6 @@ public class SignUpActivity extends AppCompatActivity {
     private static boolean isRegisterDevice = false;
 
     @InjectView(R.id.input_username)    EditText _usernameText;
-    @InjectView(R.id.input_studentId)   EditText _studentIdText;
     @InjectView(R.id.input_email)       EditText _emailText;
     @InjectView(R.id.input_password)    EditText _passwordText;
     @InjectView(R.id.input_confirmpass) EditText _confirmedPasswordText;
@@ -117,15 +116,14 @@ public class SignUpActivity extends AppCompatActivity {
         _signupButton.setEnabled(false);
 
         String username = _usernameText.getText().toString();
-        String studentId = _studentIdText.getText().toString();
-        String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
-        String confirmedPassword = _confirmedPasswordText.getText().toString();
+        String email = _emailText.getText().toString();
+        String role = "20";
 
         // Interact with local server
         //==========================
 
-        SignupClass user = new SignupClass(username, password, email, studentId, this);
+        SignupClass user = new SignupClass(username, password, email, role, this);
         signupAction(user);
 
         //--------------------------
@@ -171,7 +169,6 @@ public class SignUpActivity extends AppCompatActivity {
         boolean valid = true;
 
         String username = _usernameText.getText().toString();
-        String studentId = _studentIdText.getText().toString();
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
         String confirmedPassword = _confirmedPasswordText.getText().toString();
@@ -182,13 +179,6 @@ public class SignUpActivity extends AppCompatActivity {
             valid = false;
         } else {
             _usernameText.setError(null);
-        }
-
-        if (studentId.isEmpty()) {
-            _studentIdText.setError("enter a valid studentId");
-            valid = false;
-        } else {
-            _studentIdText.setError(null);
         }
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -244,8 +234,6 @@ public class SignUpActivity extends AppCompatActivity {
                         if (messageCode == 400) // BAD REQUEST HTTP
                         {
                             Notification.showMessage(SignUpActivity.this, 5);
-                            Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
-                            startActivity(intent);
                         }
                         else if (messageCode == 401) // UNAUTHORIZED
                         {

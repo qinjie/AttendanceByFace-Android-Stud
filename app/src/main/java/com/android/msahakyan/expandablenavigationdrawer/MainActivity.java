@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
+import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.ChangePasswordFragment;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.ColorInstructionFragment;
 import com.android.msahakyan.expandablenavigationdrawer.Fragment.FaceTrainingFragment;
@@ -98,8 +99,56 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        Preferences.showLoading(this, "Setup", "Loading data from server...");
+        SharedPreferences pref = this.getSharedPreferences("ATK_pref", 0);
+        String auCode = pref.getString("authorizationCode", null);
+
+        StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+        Call<ResponseBody> new_call = client.getFaceIDList();
+
+        new_call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    JSONObject data = new JSONObject(response.body().string());
+                    JSONArray arr = data.getJSONArray("face_id");
+                    if (arr.length() == 0)
+                    {
+                        GlobalVariable.isNeededToTraining = true;
+                    }
+                    else
+                    {
+                        GlobalVariable.isNeededToTraining = false;
+                    }
+                }
+                catch (Exception e){
+                    GlobalVariable.isNeededToTraining = true;
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Preferences.dismissLoading();
+            }
+        });
+
+        loadDefaultFragment();
+    }
+
+    private void loadDefaultFragment()
+    {
         //+ Load default fragment
-        android.app.Fragment fragment = new TakeAttendanceTodayFragment();
+        android.app.Fragment fragment = null;
+
+        if (GlobalVariable.isNeededToTraining == true)
+        {
+            fragment = new FaceTrainingFragment();
+        }
+        else
+        {
+            fragment = new TakeAttendanceTodayFragment();
+        }
+
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, fragment)
@@ -196,11 +245,6 @@ public class MainActivity extends ActionBarActivity {
         //- Update student email
     }
 
-    private void updateUserProfile()
-    {
-
-    }
-
     private void addDrawerItems() {
         mExpandableListAdapter = new CustomExpandableListAdapter(this, mExpandableListTitle, mExpandableListData);
         mExpandableListView.setAdapter(mExpandableListAdapter);
@@ -227,10 +271,22 @@ public class MainActivity extends ActionBarActivity {
                 android.app.Fragment fragment = null;
 
                 if(groupPosition == 0) {
+                    if (GlobalVariable.isNeededToTraining == true)
+                    {
+                        Notification.showMessage(MainActivity.this, 15);
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+                        return false;
+                    }
                     fragment = new TakeAttendanceTodayFragment();
                 }
                 else if (groupPosition == 3)
                 {
+                    if (GlobalVariable.isNeededToTraining == true)
+                    {
+                        Notification.showMessage(MainActivity.this, 15);
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+                        return false;
+                    }
                     fragment = new ColorInstructionFragment();
                 }
                 else if (groupPosition == 4)
@@ -264,9 +320,21 @@ public class MainActivity extends ActionBarActivity {
                     switch (childPosition)
                     {
                         case 0: // Timetable
+                            if (GlobalVariable.isNeededToTraining == true)
+                            {
+                                Notification.showMessage(MainActivity.this, 15);
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                return false;
+                            }
                             fragment = new TimeTableFragment();
                             break;
                         case 1: // Attendance history
+                            if (GlobalVariable.isNeededToTraining == true)
+                            {
+                                Notification.showMessage(MainActivity.this, 15);
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                return false;
+                            }
                             fragment = new HistoricalReportFragment();
                             break;
                         default:
@@ -279,8 +347,46 @@ public class MainActivity extends ActionBarActivity {
                     switch (childPosition)
                     {
                         case 0: // Face training
-                            fragment = new FaceTrainingFragment();
-                            break;
+                            if (GlobalVariable.isAllowedForTraining == false) {
+                                Preferences.showLoading(MainActivity.this, "Training", "Checking data from server...");
+
+                                SharedPreferences pref = getSharedPreferences("ATK_pref", 0);
+                                String auCode = pref.getString("authorizationCode", null);
+
+                                StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
+                                Call<ResponseBody> call = client.checkTrainFace();
+                                call.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        try {
+                                            Preferences.dismissLoading();
+
+                                            JSONObject data = new JSONObject(response.body().string());
+                                            if (data.getString("result").compareTo("true") == 0) {
+                                                GlobalVariable.isAllowedForTraining = true;
+                                            } else {
+                                                GlobalVariable.isAllowedForTraining = false;
+                                            }
+                                            setTrainingFace();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                                    }
+                                });
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                return false;
+                            }
+                            else
+                            {
+                                fragment = new FaceTrainingFragment();
+                                break;
+                            }
                         case 1: // Change password
                             fragment = new ChangePasswordFragment();
                             break;
@@ -303,8 +409,23 @@ public class MainActivity extends ActionBarActivity {
                 return false;
             }
         });
+    }
 
-
+    private void setTrainingFace()
+    {
+        android.app.Fragment fragment = null;
+        if (GlobalVariable.isAllowedForTraining == true)
+        {
+            fragment = new FaceTrainingFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .commit();
+        }
+        else
+        {
+            Notification.showMessage(MainActivity.this, 14);
+        }
     }
 
     private void setupDrawer() {

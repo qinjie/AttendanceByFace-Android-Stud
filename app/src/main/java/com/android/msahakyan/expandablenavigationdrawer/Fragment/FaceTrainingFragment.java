@@ -464,24 +464,24 @@ public class FaceTrainingFragment extends Fragment {
 
             String newFaceID = GlobalVariable.get1FaceID(getActivity(), httpRequests, imgFile);
             if(newFaceID != null) {
-                String personID = GlobalVariable.getThisPersonID(getActivity(), auCode);
+                    String personID = GlobalVariable.getThisPersonID(getActivity(), auCode);
 
-                if (personID.compareTo("") != 0) { //this person has been trained before
+                    if (personID.compareTo("") != 0) { //this person has been trained before
 
-                    ArrayList faceIDList = getThisFaceIDList(auCode);
-                    faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID, removeAll);
-                    postFaceIDListtoLocalServer(auCode, faceIDList);
-                } else {
-                    personID = create1Person(httpRequests, newFaceID);
-                    postPersonIDtoLocalServer(auCode, personID);
-                    ArrayList<String> faceIDList = new ArrayList<String>();
-                    faceIDList.add(newFaceID);
-                    postFaceIDListtoLocalServer(auCode, faceIDList);
-                }
+                        ArrayList faceIDList = getThisFaceIDList(auCode);
+                        faceIDList = substitute1FacefromPerson(httpRequests, personID, faceIDList, newFaceID, removeAll);
+                        postFaceIDListtoLocalServer(auCode, faceIDList);
+                    } else {
+                        personID = create1Person(httpRequests, newFaceID);
+                        postPersonIDtoLocalServer(auCode, personID);
+                        ArrayList<String> faceIDList = new ArrayList<String>();
+                        faceIDList.add(newFaceID);
+                        postFaceIDListtoLocalServer(auCode, faceIDList);
+                    }
                 //Show notification about sucessful training
                 GlobalVariable.saveImageURL(getActivity(), mCurrentPhotoPath);
                 Notification.showMessage(getActivity(), 0);
-
+                GlobalVariable.isAllowedForTraining = false;
             }
 
             Preferences.dismissLoading();
@@ -494,7 +494,6 @@ public class FaceTrainingFragment extends Fragment {
             loadTrainImage();
             updateImageSwitcher();
         }
-
 
         void postPersonIDtoLocalServer(String auCode, String personID){
             StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
@@ -621,6 +620,15 @@ public class FaceTrainingFragment extends Fragment {
                 Response<ResponseBody> response = call.execute();
                 JSONObject data = new JSONObject(response.body().string());
                 JSONArray arr = data.getJSONArray("face_id");
+
+                if (arr.length() > 0)
+                {
+                    GlobalVariable.isNeededToTraining = false;
+                }
+                else
+                {
+                    GlobalVariable.isNeededToTraining = true;
+                }
 
                 result = new ArrayList<String>();
                 for (int i = 0; i < arr.length(); i++)

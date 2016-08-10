@@ -59,9 +59,10 @@ public class GlobalVariable {
     public static JSONObject subjectSummary = null;
     //- Subjects summary
 
-    //+ Latest image training
-
-    //- Latest image training
+    //+ Training Flat
+    public static boolean isAllowedForTraining = false;
+    public static boolean isNeededToTraining = false;
+    //- Training Flat
 
     public static void rotateImage(String _imageDir) {
         try {

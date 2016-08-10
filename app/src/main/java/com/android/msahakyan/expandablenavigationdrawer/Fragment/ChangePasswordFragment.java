@@ -266,16 +266,16 @@ public class ChangePasswordFragment extends Fragment {
                         onChangePasswordFailed();
                         if (messageCode == 400) // BAD REQUEST HTTP
                         {
-
-                        }
-                        else if (messageCode == 401) // UNAUTHORIZED
-                        {
                             JSONObject data = new JSONObject(response.errorBody().string());
                             int errorCode = data.getInt("code");
                             if(errorCode == 1)
                                 Notification.showMessage(context, 8);
                             else if(errorCode == 8)
                                 Notification.showMessage(context, 9);
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+
                         }
                         else if (messageCode == 500) // SERVER FAILED
                         {

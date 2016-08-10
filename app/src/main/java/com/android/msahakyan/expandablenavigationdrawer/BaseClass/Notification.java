@@ -22,7 +22,10 @@ public class Notification {
             "Reset password failed! Please try again!", // 10
             "Please check your email to reset your password!", // 11
             "Error occurred in local server! Please try again later!", //12
-            "This email is not valid! Please try again!", //13
+            "This email is not valid! Please try again!", // 13
+            "This function need to be approved by your lecturer! Please try again later!", // 14
+            "Please finish Setting->Face training before do another action!", // 15
+
     };
 
     public static String [] badRequestNotification = {
