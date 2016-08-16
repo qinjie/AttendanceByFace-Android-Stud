@@ -14,7 +14,7 @@ public class Notification {
             "Your face doesn't match", // 2
             "You have to finish Training Face at least 3 times before Take Attendance!", // 3
             "Signed up successfully!\nYou must verify your email address before any further request", //4
-            "You are not signed up! Please try again!", // 5
+            "Invalid data! Please try again!", // 5
             "You must connect to the internet!", // 6
             "Password changed successfully!", // 7
             "Incorrect password! Please try again!", // 8

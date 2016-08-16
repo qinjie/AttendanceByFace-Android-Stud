@@ -482,6 +482,7 @@ public class FaceTrainingFragment extends Fragment {
                 GlobalVariable.saveImageURL(getActivity(), mCurrentPhotoPath);
                 Notification.showMessage(getActivity(), 0);
                 GlobalVariable.isAllowedForTraining = false;
+                GlobalVariable.isNeededToTraining = false;
             }
 
             Preferences.dismissLoading();

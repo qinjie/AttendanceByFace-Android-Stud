@@ -35,6 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     @InjectView(R.id.input_username)    EditText _usernameText;
     @InjectView(R.id.input_email)       EditText _emailText;
+    @InjectView(R.id.input_studentId)   EditText _studentIdText;
     @InjectView(R.id.input_password)    EditText _passwordText;
     @InjectView(R.id.input_confirmpass) EditText _confirmedPasswordText;
     @InjectView(R.id.btn_signup)        Button   _signupButton;
@@ -115,15 +116,16 @@ public class SignUpActivity extends AppCompatActivity {
 
         _signupButton.setEnabled(false);
 
-        String username = _usernameText.getText().toString();
-        String password = _passwordText.getText().toString();
-        String email = _emailText.getText().toString();
+        String username  = _usernameText.getText().toString();
+        String password  = _passwordText.getText().toString();
+        String studentId = _studentIdText.getText().toString();
+        String email     = _emailText.getText().toString();
         String role = "20";
 
         // Interact with local server
         //==========================
 
-        SignupClass user = new SignupClass(username, password, email, role, this);
+        SignupClass user = new SignupClass(username, password, email, studentId, role, this);
         signupAction(user);
 
         //--------------------------
@@ -168,10 +170,11 @@ public class SignUpActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String username = _usernameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String username          = _usernameText.getText().toString();
+        String email             = _emailText.getText().toString();
+        String password          = _passwordText.getText().toString();
         String confirmedPassword = _confirmedPasswordText.getText().toString();
+        String studentId         = _studentIdText.getText().toString();
 
 
         if (username.isEmpty() || username.length() < 4 || username.length() > 255) {
@@ -186,6 +189,13 @@ public class SignUpActivity extends AppCompatActivity {
             valid = false;
         } else {
             _emailText.setError(null);
+        }
+
+        if (studentId.isEmpty()) {
+            _studentIdText.setError("enter a valid email student number");
+            valid = false;
+        } else {
+            _studentIdText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
@@ -204,7 +214,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         if (isRegisterDevice == false)
         {
-            showMessage("Please register device before finish creating acount!");
+            showMessage("Please register device before finish creating account!");
             valid = false;
         }
 

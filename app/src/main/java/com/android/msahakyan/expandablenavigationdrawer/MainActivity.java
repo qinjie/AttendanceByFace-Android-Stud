@@ -33,6 +33,7 @@ import com.android.msahakyan.expandablenavigationdrawer.Fragment.HistoricalRepor
 import com.android.msahakyan.expandablenavigationdrawer.adapter.CustomExpandableListAdapter;
 import com.android.msahakyan.expandablenavigationdrawer.datasource.ExpandableListDataSource;
 
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -110,7 +111,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    JSONObject data = new JSONObject(response.body().string());
+                    JSONObject data = new JSONObject(URLDecoder.decode( response.body().string(), "UTF-8" ));
                     JSONArray arr = data.getJSONArray("face_id");
                     if (arr.length() == 0)
                     {
@@ -120,9 +121,12 @@ public class MainActivity extends ActionBarActivity {
                     {
                         GlobalVariable.isNeededToTraining = false;
                     }
+
+                    loadDefaultFragment();
                 }
                 catch (Exception e){
-                    GlobalVariable.isNeededToTraining = true;
+                    GlobalVariable.isNeededToTraining = false;
+                    loadDefaultFragment();
                     e.printStackTrace();
                 }
             }
@@ -131,8 +135,6 @@ public class MainActivity extends ActionBarActivity {
                 Preferences.dismissLoading();
             }
         });
-
-        loadDefaultFragment();
     }
 
     private void loadDefaultFragment()
