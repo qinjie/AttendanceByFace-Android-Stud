@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -17,14 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.LoginClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.StringClient;
+import com.google.gson.JsonObject;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import butterknife.ButterKnife;
@@ -46,7 +44,6 @@ public class LogInActivity extends AppCompatActivity {
     @InjectView(R.id.btn_login)          Button _loginButton;
     @InjectView(R.id.link_forgotPass)    TextView _forgotPassLink;
     @InjectView(R.id.link_signup)        TextView _signupLink;
-//    @InjectView(R.id.link_updateMacAddress)    TextView _registerDeviceLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,21 +51,11 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         ButterKnife.inject(this);
+        GlobalVariable.activity = LogInActivity.this;
 
         this.setTitle("Log In");
 
         if (GlobalVariable.obtainedAuCode(this)) {
-
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("ATK_pref", 0);
-            String data = pref.getString("fullTimetable", null);
-            try {
-                JSONArray temp = new JSONArray(data);
-                GlobalVariable.scheduleManager.setSchedule(temp);
-            } catch (Exception e) {
-                e.printStackTrace();
-                ErrorClass.showError(this, 17);
-            }
-
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
@@ -101,16 +88,6 @@ public class LogInActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_SIGNUP);
             }
         });
-
-//        _registerDeviceLink.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                // Start the RegisterNewDeviceActivity activity
-//                Intent intent = new Intent(getApplicationContext(), RegisterNewDeviceActivity.class);
-//                startActivityForResult(intent, REQUEST_REGISTER_DEVICE);
-//            }
-//        });
 
         if (!isNetworkAvailable())
         {
@@ -148,18 +125,10 @@ public class LogInActivity extends AppCompatActivity {
 
         _loginButton.setEnabled(false);
 
-        Preferences.showLoading(this, "Log In", "Authenticating...");
-
         String username = _usernameText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        //=======================================
-
         loginAction(username, password, this);
-
-        //---------------------------------------
-
-        Preferences.dismissLoading();
     }
 
 
@@ -167,9 +136,6 @@ public class LogInActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
                 this.finish();
             }
         }
@@ -213,47 +179,151 @@ public class LogInActivity extends AppCompatActivity {
         return valid;
     }
 
-    public void loginAction(String username, String password, final Activity activity) {
+    public void onRegisterSuccess() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Register Device");
+        builder.setMessage("Register device successfully! Your account will be active in this device tomorrow.");
+        builder.setPositiveButton("OK", null);
+        builder.create().show();
+    }
+
+    public void onRegisterFailed(int errorCode) {
+        Notification.showBadRequestNotification(LogInActivity.this, errorCode);
+    }
+
+    private void registerDevice()
+    {
+        Preferences.showLoading(this, "Register device", "Processing...");
+
+        String username = _usernameText.getText().toString();
+        String password = _passwordText.getText().toString();
+
+        JsonObject toUp = new JsonObject();
+        toUp.addProperty("username", username);
+        toUp.addProperty("password", password);
+        toUp.addProperty("device_hash", GlobalVariable.getMac(this));
+
         StringClient client = ServiceGenerator.createService(StringClient.class);
+        Call<ResponseBody> call = client.registerDevice(toUp);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Preferences.dismissLoading();
+                    int messageCode = response.code();
 
+                    if (messageCode == 200) // SUCCESS
+                    {
+                        onRegisterSuccess();
+                    }
+                    else
+                    {
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+                            JSONObject data = new JSONObject(response.errorBody().string());
+                            int errorCode = data.getInt("code");
+                            onRegisterFailed(errorCode);
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(LogInActivity.this, 12);
+                        }
+                        else {
+
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Notification.showMessage(LogInActivity.this, 12);
+            }
+        });
+    }
+
+    private void registerNewDeviceId()
+    {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Setting");
+        builder.setMessage("This device is not registered for your account. Do you want to register it now?");
+        builder.setPositiveButton("No", null);
+        builder.setNegativeButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick( final DialogInterface dialogInterface, final int i) {
+                        registerDevice();
+                    }
+                });
+
+        builder.create().show();
+    }
+
+    public void loginAction(String username, String password, final Activity activity) {
+
+        Preferences.showLoading(this, "Log In", "Authenticating...");
+
+        StringClient client = ServiceGenerator.createService(StringClient.class);
         LoginClass up = new LoginClass(username, password, this);
-
         Call<ResponseBody> call = client.login(up);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
+                    Preferences.dismissLoading();
                     int messageCode = response.code();
-
-                    if (messageCode == 200) {
+                    if (messageCode == 200) // SUCCESS
+                    {
+                        onLoginSuccess();
                         JSONObject data = new JSONObject(response.body().string());
                         String authorizationCode = data.getString("token");
                         GlobalVariable.setAuCodeInSP(LogInActivity.this, authorizationCode);
                         Intent intent = new Intent(LogInActivity.this, MainActivity.class);
                         startActivity(intent);
                     }
-                    else if(messageCode == 400) {
-                        JSONObject data = new JSONObject(response.errorBody().string());
-                        int errorCode = data.getInt("code");
-                        Notification.showLoginNoti(activity, errorCode);
+                    else
+                    {
                         onLoginFailed();
-                    }
-                    else{
-                        ErrorClass.showError(LogInActivity.this, 1);
-                        onLoginFailed();
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+                            JSONObject data = new JSONObject(response.errorBody().string());
+                            int errorCode = data.getInt("code");
+                            if (errorCode != 2)
+                            {
+                                Notification.showBadRequestNotification(LogInActivity.this, errorCode);
+                            }
+                            else
+                            {
+                                registerNewDeviceId();
+                            }
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(LogInActivity.this, 12);
+                        }
+                        else {
+
+                        }
                     }
                 } catch (Exception e) {
-                    System.out.print("Exception caught Login");
-                    ErrorClass.showError(LogInActivity.this, 2);
                     onLoginFailed();
+                    e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                System.out.print("Error Login");
-                ErrorClass.showError(LogInActivity.this, 3);
                 onLoginFailed();
             }
         });

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v7.util.SortedList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import okhttp3.ResponseBody;
@@ -511,14 +513,23 @@ public class TimeTableFragment extends Fragment {
 
     private void loadRecordForAllSubjects()
     {
+        Iterator<String> iter =  GlobalVariable.currentTimetable.keys();
+        ArrayList<String> keyArray = new ArrayList<String>();
+
+        while (iter.hasNext()) {
+            String key = iter.next();
+            keyArray.add(key);
+        }
+
+        Collections.sort(keyArray);
+
         try
         {
             int count = -1;
             int countSub = 0;
-            Iterator<String> iter =  GlobalVariable.currentTimetable.keys();
-            while (iter.hasNext())
+            for(int i = 0; i < keyArray.size(); i++)
             {
-                String key = iter.next();
+                String key = keyArray.get(i);
                 try
                 {
                     count++;

@@ -57,10 +57,13 @@ public interface StringClient {
     @GET("timetable/one-day")
     Call<ResponseBody> getOneDay(@Query("date") String date);
 
-    @POST("user/login")
+    @GET("user/check-train-face")
+    Call<ResponseBody> checkTrainFace();
+
+    @POST("user/student-login")
     Call<ResponseBody> login(@Body LoginClass up);
 
-    @POST("user/signup")
+    @POST("user/signup-student")
     Call<ResponseBody> signup(@Body SignupClass user);
 
     @POST("user/reset-password")

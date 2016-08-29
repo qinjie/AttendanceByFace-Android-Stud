@@ -41,6 +41,8 @@
 
     <string name="action_registerDevice"> I agree to register this device for my account. </string>
 
+    <string name="action_resetTraining"> I agree to clear all training images and re-train. </string>
+
     <string name="instruction_1"> This subject will be available to take attendance later. </string>
     <string name="instruction_2"> You present at class in time of this subject. </string>
     <string name="instruction_3"> You present at class late more than 15 minutes from the start time of this subject.  </string>

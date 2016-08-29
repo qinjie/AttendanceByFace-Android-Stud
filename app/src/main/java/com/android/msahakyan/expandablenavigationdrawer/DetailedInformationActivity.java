@@ -1,6 +1,5 @@
 package com.android.msahakyan.expandablenavigationdrawer;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -11,11 +10,11 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,14 +24,12 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.SystemRequirementsChecker;
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.GlobalVariable;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
@@ -52,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -60,6 +58,8 @@ import retrofit2.Response;
 public class DetailedInformationActivity extends AppCompatActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
+    private static final String FORMAT = "%02d:%02d:%02d";
+    private static final String FORMAT_2 = "%02dh %02d'";
 
     private BeaconManager beaconManager;
     private Region region;
@@ -74,6 +74,8 @@ public class DetailedInformationActivity extends AppCompatActivity {
 
     Animation animation = null;
 
+    LinearLayout display;
+
     boolean inStage;
     boolean outStage;
 
@@ -86,6 +88,8 @@ public class DetailedInformationActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         this.setTitle("Detailed Information");
+
+        display = (LinearLayout) findViewById(R.id.layout_report);
 
         beaconManager = new BeaconManager(this);
 
@@ -106,7 +110,6 @@ public class DetailedInformationActivity extends AppCompatActivity {
         } catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 26);
         }
 
         getSubjectInformation();
@@ -192,7 +195,6 @@ public class DetailedInformationActivity extends AppCompatActivity {
         } catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 26);
         }
     }
 
@@ -232,7 +234,6 @@ public class DetailedInformationActivity extends AppCompatActivity {
         catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 25);
         }
 
         return result;
@@ -328,14 +329,12 @@ public class DetailedInformationActivity extends AppCompatActivity {
                 } catch (Exception e)
                 {
                     e.printStackTrace();
-                    ErrorClass.showError(this, 29);
                 }
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            ErrorClass.showError(this, 24);
         }
     }
 
@@ -428,7 +427,6 @@ public class DetailedInformationActivity extends AppCompatActivity {
                 } catch (Exception e)
                 {
                     e.printStackTrace();
-                    ErrorClass.showError(DetailedInformationActivity.this, 23);
                 }
             }
         });
@@ -550,7 +548,6 @@ public class DetailedInformationActivity extends AppCompatActivity {
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 ex.printStackTrace();
-                ErrorClass.showError(this, 22);
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -629,9 +626,9 @@ public class DetailedInformationActivity extends AppCompatActivity {
         }
     }
 
-    private class CheckIfShowTakeButton extends AsyncTask<String, Void, Boolean> {
-        protected Boolean doInBackground(String... auCode) {
-            String result = "false";
+    private class CheckIfShowTakeButton extends AsyncTask<String, Void, JSONObject> {
+        protected JSONObject doInBackground(String... auCode) {
+            JSONObject result = new JSONObject();
             StringClient client = ServiceGenerator.createService(StringClient.class, auCode[0]);
 
             JSONArray schedule = GlobalVariable.scheduleManager.getDailySchedule();
@@ -642,47 +639,128 @@ public class DetailedInformationActivity extends AppCompatActivity {
                 Call<ResponseBody> call = client.atAttendanceTime(toUp);
                 Response<ResponseBody> response = call.execute();
 
-                int mesCode = response.code();
-                if(mesCode != 200) throw new Exception();
-                String body = response.body().string();
-                JSONObject data = new JSONObject(body);
-                result = data.getString("result");
+                int messageCode = response.code();
 
+                if (messageCode == 200) // SUCCESS
+                {
+                    String body = response.body().string();
+                    JSONObject data = new JSONObject(body);
+                    result = data;
+                }
+                else
+                {
+                    if (messageCode == 400) // BAD REQUEST HTTP
+                    {
+                        result = null;
+                    }
+                    else if (messageCode == 401) // UNAUTHORIZED
+                    {
+
+                    }
+                    else if (messageCode == 500) // SERVER FAILED
+                    {
+                        Notification.showMessage(DetailedInformationActivity.this, 12);
+                    }
+                    else {
+
+                    }
+                }
             }
             catch (Exception e){
-                ErrorClass.showError(DetailedInformationActivity.this, 33);
+                e.printStackTrace();
             }
 
-            return (result.compareTo("true") == 0);
+            return (result);
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
-            if(result){
-                setButtonsVisible();
+        protected void onPostExecute(JSONObject result) {
+            try
+            {
+                if (result == null)
+                {
+                    return;
+                }
+
+                int status = Integer.valueOf(result.getString("result"));
+                if (status == 0)
+                {
+                    setButtonsVisible();
+                }
+                else
+                {
+                    final TextView notification = new TextView(getApplicationContext());
+
+                    GradientDrawable gd = new GradientDrawable();
+                    gd.setColor(0xFFFFFFFF);
+                    gd.setCornerRadius(5);
+
+                    if (status == -1)
+                    {
+                        int waitTime = Integer.valueOf(result.getString("waitTime"));
+                        notification.setTextColor(Color.parseColor("#0b7101"));
+
+                        gd.setStroke(1, 0xFF0b7101);
+                        notification.setBackgroundDrawable(gd);
+
+                        new CountDownTimer(waitTime*1000, 1000) { // adjust the milli seconds here
+
+                            public void onTick(long millisUntilFinished) {
+
+                                String time = String.format(FORMAT,
+                                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
+
+                                notification.setText("This subject will be available to take attendance after " + time + ".");
+                            }
+
+                            public void onFinish() {
+                                display.removeAllViews();
+                                setButtonsVisible();
+                            }
+                        }.start();
+                    }
+                    else if (status == 1)
+                    {
+                        notification.setTextColor(Color.RED);
+
+                        gd.setStroke(1, 0xFFCC0000);
+                        notification.setBackgroundDrawable(gd);
+
+                        int lateTime = Integer.valueOf(result.getString("lateTime"));
+                        String time = String.format(FORMAT_2,
+                                                    TimeUnit.SECONDS.toHours(lateTime),
+                                                    TimeUnit.SECONDS.toMinutes(lateTime) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(lateTime)));
+
+                        notification.setText("This subject was not available to take attendance " + time + " ago.");
+                    }
+
+                    notification.setTextSize(16);
+                    notification.setGravity(Gravity.CENTER);
+
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                    notification.setLayoutParams(params);
+
+                    display.removeAllViews();
+                    display.addView(
+                            notification
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            if(result == null){
+
             }
             else
             {
-                TextView notification = new TextView(getApplicationContext());
-                notification.setText("This subject is not available to take attendance now.");
-                notification.setTextSize(16);
-                notification.setTextColor(Color.RED);
-                notification.setGravity(Gravity.CENTER);
 
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                notification.setLayoutParams(params);
 
-                GradientDrawable gd = new GradientDrawable();
-                gd.setColor(0xFFFFFFFF);
-                gd.setCornerRadius(5);
-                gd.setStroke(1, 0xFFCC0000);
-                notification.setBackgroundDrawable(gd);
 
-                LinearLayout display = (LinearLayout) findViewById(R.id.layout_report);
-                display.removeAllViews();
-                display.addView(
-                        notification
-                );
 
             }
         }
@@ -718,7 +796,7 @@ class VerifyThread extends Thread{
             String faceID = GlobalVariable.get1FaceID(activity, httpRequests, imgFile);
             if(faceID != null) {
                 double result = getVerification(httpRequests, personID, faceID);
-                final JSONObject serverResult = sendResultToLocalServer(result);
+                final JSONObject serverResult = sendResultToLocalServer(result, faceID);
 
                 try {
                     String record_at = serverResult.getString("recorded_at");
@@ -758,7 +836,7 @@ class VerifyThread extends Thread{
                         });
                     }
                 } catch (Exception e) {
-                    ErrorClass.showError(activity, 31);
+                    e.printStackTrace();
                 }
             }
         }
@@ -768,14 +846,14 @@ class VerifyThread extends Thread{
         Preferences.dismissLoading();
     }
 
-    JSONObject sendResultToLocalServer(double result) {
+    JSONObject sendResultToLocalServer(double result, String face_id) {
 
         int currentIndex = GlobalVariable.scheduleManager.currentLessionIndex;
         JSONArray schedule = GlobalVariable.scheduleManager.getDailySchedule();
         try {
             int timetableID = ((JSONObject) schedule.get(currentIndex)).getInt("timetable_id");
 
-            TakeAttendanceClass toUp = new TakeAttendanceClass(timetableID, result);
+            TakeAttendanceClass toUp = new TakeAttendanceClass(timetableID, result, face_id);
 
             SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
             String auCode = pref.getString("authorizationCode", null);
@@ -783,26 +861,40 @@ class VerifyThread extends Thread{
             StringClient client = ServiceGenerator.createService(StringClient.class, auCode);
             Call<ResponseBody> call = client.takeAttendance(toUp);
             Response<ResponseBody> response = call.execute();
-            int resCode = response.code();
 
-            if(resCode == 200) { // successful
+            int messageCode = response.code();
+
+            if (messageCode == 200) // SUCCESS
+            {
                 String resStr = response.body().string();
                 JSONObject resJson = new JSONObject(resStr);
+                GlobalVariable.saveImageURL(activity, mCurrentPhotoPath);
                 Notification.showMessage(activity, 1);
                 return (resJson);
             }
-            else if(resCode == 400) { // face doesn't match
-                Notification.showMessage(activity, 2);
-                return null;
-            }
-            else {
-                ErrorClass.showError(activity, 20);
+            else
+            {
+                if (messageCode == 400) // BAD REQUEST HTTP
+                {
+                    Notification.showMessage(activity, 2);
+                }
+                else if (messageCode == 401) // UNAUTHORIZED
+                {
+
+                }
+                else if (messageCode == 500) // SERVER FAILED
+                {
+                    Notification.showMessage(activity, 12);
+                }
+                else {
+
+                }
+
                 return null;
             }
         }
         catch(Exception e) {
             e.printStackTrace();
-            ErrorClass.showError(activity, 19);
         }
         return null;
     }
@@ -817,8 +909,7 @@ class VerifyThread extends Thread{
                 result = 100 - result;
         }
         catch(Exception e){
-            System.out.print("Process interrupted!");
-            ErrorClass.showError(activity, 21);
+            e.printStackTrace();
         }
 
         return result;

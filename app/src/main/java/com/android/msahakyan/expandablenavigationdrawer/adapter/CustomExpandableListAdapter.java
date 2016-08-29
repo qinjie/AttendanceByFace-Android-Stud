@@ -1,6 +1,7 @@
 package com.android.msahakyan.expandablenavigationdrawer.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -60,6 +61,10 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         TextView expandedListTextView = (TextView) convertView
             .findViewById(R.id.expandedListItem);
         expandedListTextView.setText(expandedListText);
+        if (expandedListText.compareTo("Face training") == 0)
+        {
+            expandedListTextView.setTextColor(Color.BLUE);
+        }
         return convertView;
     }
 

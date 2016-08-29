@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ErrorClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.SignupClass;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.Notification;
 import com.android.msahakyan.expandablenavigationdrawer.BaseClass.ServiceGenerator;
@@ -35,8 +34,8 @@ public class SignUpActivity extends AppCompatActivity {
     private static boolean isRegisterDevice = false;
 
     @InjectView(R.id.input_username)    EditText _usernameText;
-    @InjectView(R.id.input_studentId)   EditText _studentIdText;
     @InjectView(R.id.input_email)       EditText _emailText;
+    @InjectView(R.id.input_studentId)   EditText _studentIdText;
     @InjectView(R.id.input_password)    EditText _passwordText;
     @InjectView(R.id.input_confirmpass) EditText _confirmedPasswordText;
     @InjectView(R.id.btn_signup)        Button   _signupButton;
@@ -117,16 +116,16 @@ public class SignUpActivity extends AppCompatActivity {
 
         _signupButton.setEnabled(false);
 
-        String username = _usernameText.getText().toString();
+        String username  = _usernameText.getText().toString();
+        String password  = _passwordText.getText().toString();
         String studentId = _studentIdText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-        String confirmedPassword = _confirmedPasswordText.getText().toString();
+        String email     = _emailText.getText().toString();
+        String role = "20";
 
         // Interact with local server
         //==========================
 
-        SignupClass user = new SignupClass(username, password, email, studentId, this);
+        SignupClass user = new SignupClass(username, password, email, studentId, role, this);
         signupAction(user);
 
         //--------------------------
@@ -137,11 +136,10 @@ public class SignUpActivity extends AppCompatActivity {
         Preferences.dismissLoading();
         setResult(RESULT_OK, null);
 
-        Toast.makeText(getBaseContext(), "Signed up successfully!", Toast.LENGTH_LONG).show();
+        Notification.showMessage(SignUpActivity.this, 4);
 
         Intent intent = new Intent(SignUpActivity.this, LogInActivity.class);
         startActivity(intent);
-
     }
 
     public void onSignupFailed() {
@@ -172,11 +170,11 @@ public class SignUpActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String username = _usernameText.getText().toString();
-        String studentId = _studentIdText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String username          = _usernameText.getText().toString();
+        String email             = _emailText.getText().toString();
+        String password          = _passwordText.getText().toString();
         String confirmedPassword = _confirmedPasswordText.getText().toString();
+        String studentId         = _studentIdText.getText().toString();
 
 
         if (username.isEmpty() || username.length() < 4 || username.length() > 255) {
@@ -186,18 +184,18 @@ public class SignUpActivity extends AppCompatActivity {
             _usernameText.setError(null);
         }
 
-        if (studentId.isEmpty()) {
-            _studentIdText.setError("enter a valid studentId");
-            valid = false;
-        } else {
-            _studentIdText.setError(null);
-        }
-
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             _emailText.setError("enter a valid email address");
             valid = false;
         } else {
             _emailText.setError(null);
+        }
+
+        if (studentId.isEmpty()) {
+            _studentIdText.setError("enter a valid email student number");
+            valid = false;
+        } else {
+            _studentIdText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
@@ -216,7 +214,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         if (isRegisterDevice == false)
         {
-            showMessage("Please register device before finish creating acount!");
+            showMessage("Please register device before finish creating account!");
             valid = false;
         }
 
@@ -235,23 +233,35 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-
                     int messageCode = response.code();
-                    if(messageCode == 200){
+                    if (messageCode == 200) // SUCCESS
+                    {
                         onSignupSuccess();
                     }
-                    else{
-                        // handle when cannot signup
+                    else
+                    {
                         onSignupFailed();
-                        Notification.showMessage(SignUpActivity.this, 5);
-                        Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
-                        startActivity(intent);
+                        if (messageCode == 400) // BAD REQUEST HTTP
+                        {
+                            Notification.showMessage(SignUpActivity.this, 5);
+                        }
+                        else if (messageCode == 401) // UNAUTHORIZED
+                        {
+
+                        }
+                        else if (messageCode == 500) // SERVER FAILED
+                        {
+                            Notification.showMessage(SignUpActivity.this, 12);
+                        }
+                        else {
+
+                        }
                     }
 
                 }
                 catch(Exception e){
+                    onSignupFailed();
                     e.printStackTrace();
-                    ErrorClass.showError(SignUpActivity.this, 27);
                     Intent intent = new Intent(SignUpActivity.this, SignUpActivity.class);
                     startActivity(intent);
                 }
@@ -259,7 +269,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ErrorClass.showError(SignUpActivity.this, 28);
+                onSignupFailed();
             }
         });
     }
