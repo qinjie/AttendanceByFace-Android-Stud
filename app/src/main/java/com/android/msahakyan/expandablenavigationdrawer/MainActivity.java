@@ -112,21 +112,27 @@ public class MainActivity extends ActionBarActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
                     JSONObject data = new JSONObject(URLDecoder.decode( response.body().string(), "UTF-8" ));
-                    JSONArray arr = data.getJSONArray("face_id");
-                    if (arr.length() == 0)
+                    String temp = data.getString("face_id");
+                    if (temp.compareTo("") == 0)
                     {
                         GlobalVariable.isNeededToTraining = true;
                     }
                     else
                     {
-                        GlobalVariable.isNeededToTraining = false;
+                        JSONArray arr = data.getJSONArray("face_id");
+                        if (arr.length() == 0)
+                        {
+                            GlobalVariable.isNeededToTraining = true;
+                        }
+                        else
+                        {
+                            GlobalVariable.isNeededToTraining = false;
+                        }
                     }
 
                     loadDefaultFragment();
                 }
                 catch (Exception e){
-                    GlobalVariable.isNeededToTraining = false;
-                    loadDefaultFragment();
                     e.printStackTrace();
                 }
             }
@@ -325,7 +331,6 @@ public class MainActivity extends ActionBarActivity {
                             if (GlobalVariable.isNeededToTraining == true)
                             {
                                 Notification.showMessage(MainActivity.this, 15);
-                                mDrawerLayout.closeDrawer(GravityCompat.START);
                                 return false;
                             }
                             fragment = new TimeTableFragment();
@@ -334,7 +339,6 @@ public class MainActivity extends ActionBarActivity {
                             if (GlobalVariable.isNeededToTraining == true)
                             {
                                 Notification.showMessage(MainActivity.this, 15);
-                                mDrawerLayout.closeDrawer(GravityCompat.START);
                                 return false;
                             }
                             fragment = new HistoricalReportFragment();
@@ -455,6 +459,11 @@ public class MainActivity extends ActionBarActivity {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 
     @Override

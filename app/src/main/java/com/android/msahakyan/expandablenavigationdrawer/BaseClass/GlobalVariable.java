@@ -221,12 +221,19 @@ public class GlobalVariable {
         }
     }
 
-    public static void saveImageURL(Activity activity, String mCurrentPhotoPath) {
+    public static void saveImageURL(Activity activity, String mCurrentPhotoPath, boolean removeAll) {
         SharedPreferences pref = activity.getSharedPreferences("ATK_pref", 0);
         int lastIndex = pref.getInt("indexFaceList", -1);
         int currIndex = lastIndex + 1 >= GlobalVariable.maxLengthFaceList ? 0 : lastIndex + 1;
 
         SharedPreferences.Editor editor = pref.edit();
+
+        if(removeAll) {
+            for (int i = 0; i < GlobalVariable.maxLengthFaceList; i++)
+                editor.putString("FaceList" + i, "");
+            currIndex = 0;
+        }
+
         editor.putString("FaceList" + currIndex, mCurrentPhotoPath);
         editor.putInt("indexFaceList", currIndex);
         editor.apply();
