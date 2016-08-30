@@ -479,10 +479,14 @@ public class FaceTrainingFragment extends Fragment {
                         postFaceIDListtoLocalServer(auCode, faceIDList);
                     }
                 //Show notification about sucessful training
-                GlobalVariable.saveImageURL(getActivity(), mCurrentPhotoPath);
+                GlobalVariable.saveImageURL(getActivity(), mCurrentPhotoPath, removeAll);
                 Notification.showMessage(getActivity(), 0);
                 GlobalVariable.isAllowedForTraining = false;
                 GlobalVariable.isNeededToTraining = false;
+            }
+            else
+            {
+                Notification.showMessage(context, 16);
             }
 
             Preferences.dismissLoading();

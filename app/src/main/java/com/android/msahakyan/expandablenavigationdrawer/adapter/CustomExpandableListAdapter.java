@@ -61,10 +61,6 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         TextView expandedListTextView = (TextView) convertView
             .findViewById(R.id.expandedListItem);
         expandedListTextView.setText(expandedListText);
-        if (expandedListText.compareTo("Face training") == 0)
-        {
-            expandedListTextView.setTextColor(Color.BLUE);
-        }
         return convertView;
     }
 

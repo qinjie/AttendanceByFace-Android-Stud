@@ -868,7 +868,7 @@ class VerifyThread extends Thread{
             {
                 String resStr = response.body().string();
                 JSONObject resJson = new JSONObject(resStr);
-                GlobalVariable.saveImageURL(activity, mCurrentPhotoPath);
+                GlobalVariable.saveImageURL(activity, mCurrentPhotoPath, false);
                 Notification.showMessage(activity, 1);
                 return (resJson);
             }

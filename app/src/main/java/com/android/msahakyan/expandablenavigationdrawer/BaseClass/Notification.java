@@ -24,7 +24,8 @@ public class Notification {
             "Error occurred in local server! Please try again later!", //12
             "This email is not valid! Please try again!", // 13
             "This function need to be approved by your lecturer! Please try again later!", // 14
-            "Please finish Setting->Face training before do another action!", // 15
+            "Please finish Face training before do another action!", // 15
+            "Can not detect face in this image. Please try again!", //16
 
     };
 
