@@ -1,5 +1,3 @@
-# AttendanceByFace-Android-Stud
-
 ## API Document
 
 API document availalbe in Postman 
@@ -20,3 +18,5 @@ For lecturer app
 	Lecturer 4: username = tangseng, password = 123456
 	Lecturer 5: username = zhangqinjie, password = 123456
 
+
+Hello World
